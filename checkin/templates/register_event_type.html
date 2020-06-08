@@ -41,44 +41,55 @@
 
 		  view-source:https://getbootstrap.com/docs/4.5/examples/checkout/
 		  view-source:https://getbootstrap.com/docs/4.5/examples/sign-in/
-
-		<form method="post" action="http://127.0.0.1:8000/eventtype/">
+		  https://github.com/oinsd/FastAPI-Learning-Example/blob/master/FastAPI_No.21_Form_Data/
 		
-		https://www.geeksforgeeks.org/how-to-send-a-json-object-to-a-server-using-javascript/
-		
+		Probably doesn't need to be in a <form> element. Hitting the submit button emits a 
+		GET request parameterized per the form fields in addition to the bound onClick event's POST request.
 		-->
 		<form id="registerEventType" class="form-centered">
 			<div class="form-group">
 				<label for="eventTypeName" class="sr-only">Name for event type</label>
-				<input type="text" class="form-control" id="eventTypeName" placeholder="Name for event type" value="" aria-describedby="eventTypeNameHelp" required autofocus>
+				<input type="text" class="form-control" id="eventTypeName" name="eventTypeName" placeholder="Name for event type" value="" aria-describedby="eventTypeNameHelp" required autofocus>
 				<small id="eventTypeNameHelp" class="form-text text-muted">Register a new event type so you can start tracking checkins.</small>
 				
 				<label for="ParentEventTypeID" class="sr-only">Parent Event Type ID"</label>
-				<input type="text" class="form-control" id="ParentEventTypeID" placeholder="Parent event type UUID" value="" aria-describedby="ParentEventTypeIDHelp">
+				<input type="text" class="form-control" id="ParentEventTypeID" name="ParentEventTypeID" placeholder="Parent event type UUID" value="" aria-describedby="ParentEventTypeIDHelp">
 				<small id="eventTypeNameHelp" class="form-text text-muted">If this event is a subtype of an event you have already registered, you can specify that here. E.g. "Groceries" might be a (checkinable) subtype of "Errands" (not checkinable: just a category).</small>
 				
 				<div class="checkbox mb-3">
 					<label>
-						<input type="checkbox" value="is_checkinable" checked> Checkinable?
+						<input type="checkbox" value="is_checkinable" id="is_checkinable" checked> Checkinable?
 					</label>
 				</div>
 				
 				<hr class="mb-4">
-				<button class="btn btn-primary btn-lg btn-block" type="submit">Submit</button>
+				
+				<button class="btn btn-primary btn-lg btn-block" type="submit" id="formSubmit" onclick="sendJSON()">Submit</button>
+				
 			</div>
 		</form>
 
 	<script type="text/javascript">
-	var formData = JSON.stringify($("#registerEventType").serializeArray());
 	
-	$.ajax({
-	  type: "POST",
-	  url: "http://127.0.0.1:8000/eventtype/",
-	  data: formData,
-	  success: function(){},
-	  dataType: "json",
-	  contentType : "application/json"
-	});
+		/*
+		 * via https://www.geeksforgeeks.org/how-to-send-a-json-object-to-a-server-using-javascript/
+		 */
+		function sendJSON(){ 
+			let name = document.querySelector('#eventTypeName');
+            let parent_id = document.querySelector('#ParentEventTypeID');
+			let is_checkinable = document.querySelector('#is_checkinable');
+			
+            let xhr = new XMLHttpRequest(); 
+            let url = "/eventtype/"; 
+			
+            xhr.open("POST", url, true); 
+            xhr.setRequestHeader("Content-Type", "application/json"); 
+			var data = JSON.stringify({ "name": name.value
+			                            //"parent_id": parent_id.value,
+										//"is_checkinable": is_checkinable.value
+										});
+            xhr.send(data); 
+        } 
 	
 	</script>
 

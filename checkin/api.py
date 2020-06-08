@@ -1,12 +1,15 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
 from datetime import datetime
-from typing import Optional
 from collections import defaultdict
 import uuid
 import networkx as nx
 
+from fastapi import FastAPI, Response, Request, Form
+from fastapi.templating import Jinja2Templates
+from pydantic import BaseModel
+from typing import Optional
+
 app = FastAPI()
+templates = Jinja2Templates(directory="templates")
 
 ###########################################
 
@@ -47,6 +50,7 @@ async def post_checkin(checkin: Checkin):
     DATA.append(checkin)
     return True
     
+
 @app.post("/eventtype/")
 async def register_event_type(event_type: EventType):
     new_id = uuid.uuid4()
@@ -59,6 +63,26 @@ async def register_event_type(event_type: EventType):
     #    G.add_edge('0', new_id)
     G.add_edge(event_type.parent_id, new_id)
     return new_id
+
+'''
+@app.post("/eventtype/")
+async def register_event_type(eventTypeName: str = Form(...), 
+                              ParentEventTypeID: Optional[uuid.UUID] = Form(...)
+                              #,is_checkinable =
+                              #parent_id = 
+                              ):
+    new_id = uuid.uuid4()
+    EventType(id=new_id, name=eventTypeName)
+    #event_type.id = new_id
+    #EVENT_TYPES[new_id] = event_type
+    G.add_node(new_id, obj=event_type)
+    #if event_type.parent_id is not None:
+    #    G.add_edge(event_type.parent_id, new_id)
+    #else:
+    #    G.add_edge('0', new_id)
+    G.add_edge(event_type.parent_id, new_id)
+    return new_id
+'''
 
 @app.get("/eventtype/")
 async def get_event_types():
@@ -74,3 +98,7 @@ async def get_event_type(eventtype_id: uuid.UUID):
 @app.get("/data/")
 async def get_data():
     return DATA
+    
+@app.get("/")
+async def homepage(request: Request):
+    return templates.TemplateResponse("register_event_type.html", {"request": request})
