@@ -102,3 +102,8 @@ async def get_data():
 @app.get("/")
 async def homepage(request: Request):
     return templates.TemplateResponse("register_event_type.html", {"request": request})
+    
+@app.get("/test")
+async def test(request: Request):
+    return templates.TemplateResponse("register_event_type2.html", {"request": request, 
+        "route":"TestRoute", "vars_dict":{"var1":"foo","var2":"bar"}})

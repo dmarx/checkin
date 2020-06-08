@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<!-- Required meta tags -->
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+		<!-- Bootstrap CSS -->
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+
+		<!-- JS, Popper.js, and jQuery 
+		<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+		-->
+		<script src="https://code.jquery.com/jquery-3.5.1.min.js" crossorigin="anonymous"></script>
+		<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+		
+		<title>Check In!</title>
+		
+		<style>
+		#inputFor{{route}} {
+			width: 100%;
+			max-width: 400px;
+			padding: 15px;
+			margin: auto;
+		}
+		</style>
+		
+	</head>
+
+	<body class="text-center">
+
+		
+		<h1 class="h3 mb-3 font-weight-normal">Register Event Type</h1>
+
+/*
+ * vars_dict = {var_name:var_type}
+ * route = "/routeUrl/"
+ */
+
+<div id="inputFor{{route}}">
+
+	{% for var_name in vars_dict.keys() %}
+	
+		<div class="form-group">
+			<label for="{{ var_name }} "class="sr-only">{{ var_name.title() }}</label>
+			<input type="text" id="{{ var_name }}" name="{{ var_name }}" class="form-control" >
+		</div>
+		
+	{% endfor %}
+
+	<hr class="mb-4">
+	
+	<button class="btn btn-primary btn-lg btn-block" id="formSubmit" onclick="{{ route }}_sendJSON()">Submit</button>
+
+</div>
+
+<script>
+
+function {{ route }}_sendJSON(){ 
+
+	{% for var_name in vars_dict.keys() %}
+		let {{ var_name }} = document.querySelector('#{{ var_name }}').value;
+	{% endfor %}
+
+	let xhr = new XMLHttpRequest(); 
+	let url = "/{{ route }}/"; 
+					
+	
+
+	let payload = {};
+
+	// https://stackoverflow.com/questions/11704267/in-javascript-how-to-conditionally-add-a-member-to-an-object
+	//Object.assign(payload, conditionX && { "{{ var_name }}" : {{ var_name }} };
+
+	{% for var_name, var_type in vars_dict.items() %}
+		Object.assign(payload, { "{{ var_name }}" : {{ var_name }} });
+	{% endfor %}
+
+	console.log(payload);
+
+	var data = JSON.stringify(payload);
+	
+	console.log(data);
+	
+	xhr.open("POST", url, true); 
+	xhr.setRequestHeader("Content-Type", "application/json"); 
+	xhr.send(data); 
+}
+
+</script>
+
+	</body>
+</html>
