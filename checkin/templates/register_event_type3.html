@@ -1,32 +1,21 @@
-<!doctype html>
-<html lang="en">
-
-	<head>
-
-	{% include 'standard_header.html' %}
-
-		<title>Check In!</title>
+{% extends 'layout.html' %}
 		
-		<style>
-		#inputFor{{route}} {
-			width: 100%;
-			max-width: 400px;
-			padding: 15px;
-			margin: auto;
-		}
-		</style>
+{% block inline_style %}	
+	<style>
+	#inputFor{{route}} {
+		width: 100%;
+		max-width: 400px;
+		padding: 15px;
+		margin: auto;
+	}
+	</style>
+{% endblock %}
 		
-	</head>
-
+{% block body %}
 	<body class="text-center">
-
+	
 		
 		<h1 class="h3 mb-3 font-weight-normal">Register Event Type</h1>
-
-/*
- * vars_dict = {var_name:var_type}
- * route = "/routeUrl/"
- */
 
 <div id="inputFor{{route}}">
 
@@ -79,6 +68,4 @@ function {{ route }}_sendJSON(){
 }
 
 </script>
-
-	</body>
-</html>
+{% endblock %}
