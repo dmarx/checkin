@@ -1,0 +1,20 @@
+{% extends 'layout.html' %}
+	
+{% block body %}
+
+<ul class="sitemap">
+{%- for item in data_tree recursive %}
+    <!-- <li><a href="{{ item.href|e }}">{{ item.title }}</a> -->
+	<li> {{ item.id }} 
+	{%- if item.obj -%}
+		| {{ item.obj.name }} | {{item.obj.is_checkinable}}	
+	{%- endif -%}
+    {%- if item.children -%}
+        <ul class="submenu">{{ loop(item.children) }}</ul>
+    {%- endif %}</li>
+{%- endfor %}
+</ul>
+
+{{ data_tree }}
+
+{% endblock %}
