@@ -88,10 +88,20 @@ async def homepage(request: Request):
 @app.get("/test")
 async def test(request: Request):
     return templates.TemplateResponse("register_event_type3.html", {"request": request, 
-        "route":"eventtype", "vars_dict":{"name":"str", "parent_id":"str"}})
+                                      "vars_dict":{"name":"str", "parent_id":"str"}})
         
 @app.get("/tree")
 async def tree(request: Request):
-    return templates.TemplateResponse("event_types_tree.html", 
-                                      {"request": request, "route":"eventtype", 
-                                      "data_tree": [nx.json_graph.tree_data(G, root='0')]}) # can I call get_event_types here?
+    return templates.TemplateResponse("event_types_tree.html", {"request": request,
+                                      "data_tree": [nx.json_graph.tree_data(G, root='0')]}) 
+                                      # can I call get_event_types here?
+
+@app.get("/checkin/{name}/{event_type_id}")
+async def checkin(request: Request, event_type_id:uuid.UUID ):
+    # In the URL pattern, {name} can be literally anything. Just using this
+    # pattern for user readability. Not necessary at all. Just need the event_type_id
+    tree = [nx.json_graph.tree_data(G, root=event_type_id)]
+    event_type = tree[0]['obj']
+    return templates.TemplateResponse("checkin.html", {"request": request, 
+                                      "tree": tree, "event_type": event_type})
+                                      

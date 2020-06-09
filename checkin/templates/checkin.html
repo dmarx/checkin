@@ -1,0 +1,69 @@
+{% extends 'layout.html' %}
+	
+{% block inline_style %}	
+	<style>
+	#inputForCheckin {
+		width: 100%;
+		max-width: 400px;
+		padding: 15px;
+		margin: auto;
+	}
+	</style>
+{% endblock %}
+	
+{% block body %}
+<!-- start with a submission form for a single event type
+     then develop the submission form for the tree.
+	 Will probably need to iterate on the design for the latter
+	 quite a bit.
+-->
+<body class="text-center">
+	
+		
+	<h1 class="h3 mb-3 font-weight-normal">Checkin: {{ event_type.name }}</h1>
+	<div id="inputForCheckin">
+		<input type="datetime-local" name="datetime" id="datetime">
+		{% for field, type in (("value","number"), ("comments", "text") ) %}
+		<div class="form-group">
+			<label for="{{ field }} "class="sr-only">{{ field }}</label>
+			<input type="{{ type }}" placeholder="{{ field }}" id="{{ field }}" name="{{ field }}" class="form-control" >
+		</div>
+		{% endfor %}
+		
+		<hr class="mb-4">
+		
+		<button class="btn btn-primary btn-lg btn-block" id="formSubmit" onclick="_sendJSON()">Submit</button>
+		
+	</div>
+
+
+<script>
+function _sendJSON(){ 
+
+	{% for var_name in ("datetime", "value", "comments") %}
+		let {{ var_name }} = document.querySelector('#{{ var_name }}').value;
+	{% endfor %}
+
+	let xhr = new XMLHttpRequest(); 
+	let url = "/checkin/"; 
+
+	let payload = {"event_type": "{{ event_type.id }}" };
+
+	{% for var_name in ("datetime", "value", "comments") %}
+		Object.assign(payload, ({{ var_name }}.length > 0) && { "{{ var_name }}" : {{ var_name }} });
+	{% endfor %}
+
+	console.log(payload);
+
+	var data = JSON.stringify(payload);
+	
+	console.log(data);
+	
+	xhr.open("POST", url, true); 
+	xhr.setRequestHeader("Content-Type", "application/json"); 
+	xhr.send(data); 
+}
+
+</script>
+
+{% endblock %}
