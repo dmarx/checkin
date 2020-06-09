@@ -8,20 +8,15 @@ from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from typing import Optional
 
+import shelve
+
+db_path = "checkin_data.shelf"
+
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 
 ###########################################
 
-# temporary, hyper-simple datamodel
-DATA = []
-#EVENT_TYPE_TAXONOMY = defaultdict(list)
-#EVENT_TYPES = defaultdict(dict) # {eventtypeid:EventType}
-
-G = nx.DiGraph()
-G.add_node('0')
-
-###########################################
 
 class Checkin(BaseModel):
     timestamp: Optional[datetime]
@@ -37,7 +32,21 @@ class EventType(BaseModel):
     is_checkinable: bool = True
     parent_id: Optional[uuid.UUID] = '0'
     
+    
+###########################################
 
+# temporary, hyper-simple datamodel
+DATA = []
+
+G = nx.DiGraph()
+G.add_node('0')
+
+with shelve.open(db_path) as db:
+    if 'DATA' in db:
+        DATA = db['DATA']
+    if 'G' in db:
+        G = db['G']
+        
 ###########################################
     
 # API
@@ -46,31 +55,29 @@ class EventType(BaseModel):
 async def post_checkin(checkin: Checkin):
     if not checkin.timestamp:
         checkin.timestamp = datetime.now()
-    DATA.append(checkin)
+    with shelve.open(db_path, writeback=True) as db:
+        db['DATA'].append(checkin)
+        global DATA
+        DATA = db['DATA']
     return True
     
 @app.post("/eventtype/")
 async def register_event_type(event_type: EventType):
     new_id = uuid.uuid4()
     event_type.id = new_id
-    #EVENT_TYPES[new_id] = event_type
-    G.add_node(new_id, obj=event_type)
-    #if event_type.parent_id is not None:
-    #    G.add_edge(event_type.parent_id, new_id)
-    #else:
-    #    G.add_edge('0', new_id)
-    G.add_edge(event_type.parent_id, new_id)
+    with shelve.open(db_path, writeback=True) as db:
+        global G
+        G = db['G']
+        G.add_node(new_id, obj=event_type)
+        G.add_edge(event_type.parent_id, new_id)
     return new_id
 
 @app.get("/eventtype/")
 async def get_event_types():
-    #return EVENT_TYPES, EVENT_TYPE_TAXONOMY
-    #eturn G
     return nx.json_graph.tree_data(G, root='0')
     
 @app.get("/eventtype/{eventtype_id}", response_model=EventType)
 async def get_event_type(eventtype_id: uuid.UUID):
-    #return EVENT_TYPES[eventtype_id]
     return G.nodes(data=True)[eventtype_id]['obj']
     
 @app.get("/data/")
