@@ -38,6 +38,16 @@
 
 
 <script>
+
+/*
+Default datepicker value
+https://stackoverflow.com/questions/6982692/how-to-set-input-type-dates-default-value-to-today
+*/
+var default_date = new Date();
+default_date.setMinutes(default_date.getMinutes() - default_date.getTimezoneOffset())
+document.getElementById('datetime').value = default_date.toJSON().slice(0,19);
+
+
 function _sendJSON(){ 
 
 	{% for var_name in ("datetime", "value", "comments") %}

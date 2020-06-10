@@ -5,7 +5,7 @@
 <ul class="sitemap">
 {%- for item in data_tree recursive %}
 	{%- if item.obj -%}
-	<li> <a href="/checkin/{{ item.obj.name }}/{{ item.id }}">{{ item.obj.name }}</a>
+	<li> <a class="btn btn-primary" href="/checkin/{{ item.obj.name }}/{{ item.id }}">{{ item.obj.name }}</a>
 	{%- endif -%}
     {%- if item.children -%}
         <ul class="submenu">{{ loop(item.children) }}</ul>
