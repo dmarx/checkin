@@ -1,14 +1,15 @@
-from datetime import datetime
 from collections import defaultdict
+from datetime import datetime
 import uuid
+import shelve
 import networkx as nx
 
 from fastapi import FastAPI, Response, Request, Form
 from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel
 from typing import Optional
 
-import shelve
+from models import Checkin, EventType
+
 
 db_path = "checkin_data.shelf"
 
@@ -17,21 +18,6 @@ templates = Jinja2Templates(directory="templates")
 
 ###########################################
 
-
-class Checkin(BaseModel):
-    timestamp: Optional[datetime]
-    #event_type: str
-    event_type: uuid.UUID
-    value: Optional[int]
-    comments: Optional[str]
-      
-    
-class EventType(BaseModel):
-    id: Optional[uuid.UUID]
-    name: str
-    is_checkinable: bool = True
-    parent_id: Optional[uuid.UUID] = '0'
-    
     
 ###########################################
 
