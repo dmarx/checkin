@@ -540,11 +540,16 @@ const arc = d3.arc()
       //
       .attr("fill-opacity", d => +labelVisible(d.current))
       .attr("transform", d => labelTransform(d.current))
+	  //.append('a')
+	  //.attr('href', d => `checkin/${d.data.name}/${d.data.id}`)
   ;
   
   // box around label text. Struggling to turn this into a clickable button.
   // path click event overrides for some reason
-  const label_box = labelg.append('rect')
+  const label_box = labelg
+      //.append('a')
+      //.attr('href', d => `checkin/${d.data.name}/${d.data.id}`)
+      .append('rect')
       .attr("width", d => d.data.name.length * 6) // rough estimate. good enough for now
       .attr("height", 12)
       .attr("rx", 3)
@@ -557,7 +562,9 @@ const arc = d3.arc()
       .style("cursor", "grab")
   ;
   
-  const label_text = labelg.append('text')
+  const label_text = labelg.append('a')
+      .attr('href', d => `checkin/${d.data.name}/${d.data.id}`)
+	  .append('text')
       .attr("dy", "0.35em")
       .text(d => d.data.name);
   
@@ -573,7 +580,7 @@ const arc = d3.arc()
   
   //labelg.filter(d => d.children)
   labelg.style("cursor", "grab")
-      .on("click", d => console.log(d))
+      //.on("click", d => console.log(d))
       .append("title")
       .text(d => "Checkin " + d.data.name)
   ;
@@ -602,6 +609,9 @@ const arc = d3.arc()
   function breadcrumbs(d) { 
     return `${d.ancestors().map(d => d.data.name).reverse().slice(1).join(" > ")}`
   }
+  
+  
+  
   
   function clicked(p) {
     parent.datum(p.parent || root);
@@ -651,6 +661,8 @@ const arc = d3.arc()
        ;
     
   } // end clicked()
+  
+
   
   function arcVisible(d) {
     return d.y1 <= 3 && d.y0 >= 1 && d.x1 > d.x0;
