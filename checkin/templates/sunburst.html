@@ -4,14 +4,60 @@
 		<script src="https://d3js.org/d3.v5.min.js" crossorigin="anonymous"></script>
 {% endblock %}
 
+{% block inline_style %}
+	<style>
+	.full-width-div {
+		position: absolute;
+		width: 100%;
+		left: 0;
+	}
+	</style>
+{% endblock %}
+
 {% block body %}
 
-		<svg class="sunburst-nav">
+<!--
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+		-->
+            <div id="chartId" class="full-width-div">
+			
+				<!--
+				<svg class="sunburst-nav">
+			
+            </div>
+        </div>
+    </div>
+</div>
+-->
 		
-		<script>
 		
+		<script>		
 		
+const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
 		
+// https://stackoverflow.com/questions/16265123/resize-svg-when-window-is-resized-in-d3-js
+d3.select("div#chartId")
+   .append("div")
+   // Container class to make it responsive.
+   .classed("svg-container", true) 
+   .append("svg")
+   .classed("sunburst-nav", true)
+   // Responsive SVG needs these 2 attributes and no width and height attr.
+   .attr("preserveAspectRatio", "xMinYMin meet")
+   //.attr("viewBox", "0 0 600 400")
+   .attr("viewBox", `0 0 ${vw} ${vh}`)
+   // Class to make it responsive.
+   .classed("svg-content-responsive", true)
+   // Fill with a rectangle for visualization.
+   /*.append("rect")
+   .classed("rect", true)
+   .attr("width", 600)
+   .attr("height", 400);
+   */
+   
 ///////////////////////////////////////////////////////////////////////////////////
 
 data = {'name':'root',
@@ -487,8 +533,10 @@ partition = data => {
 
 let color = d3.scaleOrdinal(d3.quantize(d3.interpolateRainbow, data.children.length + 1));
 		
-let width = 932;
-let radius = width / 6;
+//let width = 932;
+//let width = 600;
+const width = vh;
+const radius = width / 6;
 
 const arc = d3.arc()
     .startAngle(d => d.x0)
@@ -508,7 +556,7 @@ const arc = d3.arc()
 
   //const svg = d3.create("svg.sunburst-nav")
   const svg = d3.select("svg")
-      .attr("viewBox", [0, 0, width, width])
+      //.attr("viewBox", [0, 0, width, width])
       .style("font", "10px sans-serif");
 
   // top level "g"
