@@ -10,10 +10,16 @@ from typing import Optional
 
 from models import Checkin, EventType
 
+from fastapi.staticfiles import StaticFiles
 
 db_path = "checkin_data.shelf"
 
 app = FastAPI()
+
+# Jesus.... this piece here is a mess for some reason. Screw url_for(),
+# it's uglier, but I'll just put the json directly in the template. Yeesh.
+##app.mount("/static", StaticFiles(directory="static", check_dir=True), name="static")
+
 templates = Jinja2Templates(directory="templates")
 
 ###########################################
@@ -85,7 +91,8 @@ async def test(request: Request):
         
 @app.get("/tree")
 async def tree(request: Request):
-    return templates.TemplateResponse("event_types_tree.html", {"request": request,
+    #return templates.TemplateResponse("event_types_tree.html", {"request": request,
+    return templates.TemplateResponse("sunburst.html", {"request": request,
                                       "data_tree": [nx.json_graph.tree_data(G, root='0')]}) 
                                       # can I call get_event_types here?
 
