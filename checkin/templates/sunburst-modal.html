@@ -18,9 +18,11 @@
 
 <!-- https://sensibledev.com/bootstrap-modal-with-ajax-content/ -->
 
-<!--
 <div class="container-fluid">
     <div class="row">
+<!--
+
+
         <div class="col-md-12">
 		-->
             <div id="chartId" class="full-width-div">
@@ -30,10 +32,11 @@
 			
             </div>
         </div>
+
+
+-->
     </div>
 </div>
--->
-
 		
 <div id="modal_anchor">
 {%- for item in data_tree recursive %}
@@ -61,7 +64,7 @@
 				
 			  </div>
 			  <div class="modal-footer">
-				<button type="button" class="btn btn-primary" id="saveModal">Save</button>
+				<button type="button" class="btn btn-primary" id="saveModal" data-eventTypeId="{{ item.obj.id }}">Save</button>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
 			  </div>
 			</div>
@@ -90,8 +93,14 @@ default_date.setMinutes(default_date.getMinutes() - default_date.getTimezoneOffs
 d3.selectAll('input#datetime').attr('value', default_date.toJSON().slice(0,19));
 
 function _sendJSON(){ 
-	console.log("_sendJSON() called");
+    
+	console.log("_sendJSON() activated");
+	console.log(this.dataset.eventTypeId);
+	
 }
+
+$("button#saveModal").click(this, _sendJSON);
+
 
 
 ///////////////////////////////////////////////////////////////////////////////////
