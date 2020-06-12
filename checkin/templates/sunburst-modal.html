@@ -94,8 +94,34 @@ d3.selectAll('input#datetime').attr('value', default_date.toJSON().slice(0,19));
 
 function _sendJSON(){ 
     
-	console.log("_sendJSON() activated");
-	console.log(this.dataset.eventTypeId);
+	//console.log("_sendJSON() activated");
+	//console.log(this.dataset.eventTypeId);
+	//console.log(this);
+	console.log($(this).attr("data-eventTypeId"));
+	
+	
+	{% for var_name in ("datetime", "value", "comments") %}
+		let {{ var_name }} = document.querySelector('#{{ var_name }}').value;
+	{% endfor %}
+
+	let xhr = new XMLHttpRequest(); 
+	let url = "/checkin/"; 
+
+	let payload = {"event_type": $(this).attr("data-eventTypeId") };
+
+	{% for var_name in ("datetime", "value", "comments") %}
+		Object.assign(payload, ({{ var_name }}.length > 0) && { "{{ var_name }}" : {{ var_name }} });
+	{% endfor %}
+
+	console.log(payload);
+
+	var data = JSON.stringify(payload);
+	
+	console.log(data);
+	
+	xhr.open("POST", url, true); 
+	xhr.setRequestHeader("Content-Type", "application/json"); 
+	xhr.send(data); 
 	
 }
 
