@@ -92,7 +92,8 @@ async def test(request: Request):
 @app.get("/tree")
 async def tree(request: Request):
     #return templates.TemplateResponse("event_types_tree.html", {"request": request,
-    return templates.TemplateResponse("sunburst.html", {"request": request,
+    #return templates.TemplateResponse("sunburst.html", {"request": request,
+    return templates.TemplateResponse("sunburst-modal.html", {"request": request,
                                       "data_tree": [nx.json_graph.tree_data(G, root='0')]}) 
                                       # can I call get_event_types here?
 
