@@ -7,9 +7,14 @@
 {% block inline_style %}
 	<style>
 	.full-width-div {
+		/*
 		position: absolute;
 		width: 100%;
 		left: 0;
+		*/
+		width: 100%;
+		/*display: flex;   */
+		justify-content: center;
 	}
 	</style>
 {% endblock %}
@@ -20,21 +25,13 @@
 
 <div class="container-fluid">
     <div class="row">
-<!--
-
-
         <div class="col-md-12">
-		-->
             <div id="chartId" class="full-width-div">
-			
+			</div>
 				<!--
 				<svg class="sunburst-nav">
-			
-            </div>
-        </div>
-
-
 -->
+       </div>
     </div>
 </div>
 		
@@ -143,9 +140,11 @@ d3.select("div#chartId")
    .append("svg")
    .classed("sunburst-nav", true)
    // Responsive SVG needs these 2 attributes and no width and height attr.
-   .attr("preserveAspectRatio", "xMinYMin meet")
+   //.attr("preserveAspectRatio", "xMinYMin meet") preserveAspectRatio="xMidYMin"
+   .attr("preserveAspectRatio", "xMidYMin")
    //.attr("viewBox", "0 0 600 400")
-   .attr("viewBox", `0 0 ${vw} ${vh}`)
+   //.attr("viewBox", "0 0 100 100")
+   .attr("viewBox", `0 0 ${vw} ${vw}`)
    // Class to make it responsive.
    .classed("svg-content-responsive", true)
    // Fill with a rectangle for visualization.
