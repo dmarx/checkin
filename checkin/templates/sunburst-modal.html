@@ -16,6 +16,8 @@
 
 {% block body %}
 
+<!-- https://sensibledev.com/bootstrap-modal-with-ajax-content/ -->
+
 <!--
 <div class="container-fluid">
     <div class="row">
@@ -48,11 +50,19 @@
 				</button>
 			  </div>
 			  <div class="modal-body">
-				...
+				
+				<input type="datetime-local" name="datetime" id="datetime">
+				{% for field, type in (("value","number"), ("comments", "text") ) %}
+				<div class="form-group">
+					<label for="{{ field }} "class="sr-only">{{ field }}</label>
+					<input type="{{ type }}" placeholder="{{ field }}" id="{{ field }}" name="{{ field }}" class="form-control" >
+				</div>
+				{% endfor %}
+				
 			  </div>
 			  <div class="modal-footer">
-				<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-				<button type="button" class="btn btn-primary">Save changes</button>
+				<button type="button" class="btn btn-primary" id="saveModal">Save</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
 			  </div>
 			</div>
 		  </div>
@@ -70,8 +80,21 @@
 		<script>		
 		
 
+/*
+Default datepicker value
+https://stackoverflow.com/questions/6982692/how-to-set-input-type-dates-default-value-to-today
+*/
+var default_date = new Date();
+default_date.setMinutes(default_date.getMinutes() - default_date.getTimezoneOffset())
+//document.getElementById('datetime').value = default_date.toJSON().slice(0,19);
+d3.selectAll('input#datetime').attr('value', default_date.toJSON().slice(0,19));
+
+function _sendJSON(){ 
+	console.log("_sendJSON() called");
+}
 
 
+///////////////////////////////////////////////////////////////////////////////////
 
 		
 const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
