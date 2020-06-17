@@ -89,6 +89,33 @@ default_date.setMinutes(default_date.getMinutes() - default_date.getTimezoneOffs
 //document.getElementById('datetime').value = default_date.toJSON().slice(0,19);
 d3.selectAll('input#datetime').attr('value', default_date.toJSON().slice(0,19));
 
+// https://stackoverflow.com/questions/948532/how-do-you-convert-a-javascript-date-to-utc
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString
+if (!Date.prototype.toISOString) {
+  (function() {
+
+    function pad(number) {
+      if (number < 10) {
+        return '0' + number;
+      }
+      return number;
+    }
+
+    Date.prototype.toISOString = function() {
+      return this.getUTCFullYear() +
+        '-' + pad(this.getUTCMonth() + 1) +
+        '-' + pad(this.getUTCDate()) +
+        'T' + pad(this.getUTCHours()) +
+        ':' + pad(this.getUTCMinutes()) +
+        ':' + pad(this.getUTCSeconds()) +
+        '.' + (this.getUTCMilliseconds() / 1000).toFixed(3).slice(2, 5) +
+        'Z';
+    };
+
+  })();
+}
+
+
 function _sendJSON(){ 
     
 	//console.log("_sendJSON() activated");
@@ -97,20 +124,29 @@ function _sendJSON(){
 	let event_type_id = $(this).attr("data-eventTypeId");
 	console.log(event_type_id);
 	
-	let payload = {"event_type": event_type_id };
+	
 	
 	let modal = d3.select('#checkinModal_' + event_type_id);
-	{% for var_name in ("datetime", "value", "comments") %}
+	//{% for var_name in ("datetime", "value", "comments") %}
 		//let {{ var_name }} = document.querySelector('#{{ var_name }}').value;
-		let {{ var_name }} = modal.select('input#{{ var_name }}').node().value
-	{% endfor %}
+		//let {{ var_name }} = modal.select('input#{{ var_name }}').node().value
+	//{% endfor %}
+	let comments = modal.select('input#comments').node().value;
+	let value = modal.select('input#value').node().value;
+	//let datetime = new Date(modal.select('input#datetime').node().value).toISOString();
+	let datetime = new Date(modal.select('input#datetime').node().value);
+
+	
 
 	let xhr = new XMLHttpRequest(); 
 	let url = "/checkin/"; 
 
 	//let payload = {"event_type": $(this).attr("data-eventTypeId") };
+	let payload = {"event_type": event_type_id,
+				   "datetime": datetime };
 
-	{% for var_name in ("datetime", "value", "comments") %}
+
+	{% for var_name in ("value", "comments") %}
 		Object.assign(payload, ({{ var_name }}.length > 0) && { "{{ var_name }}" : {{ var_name }} });
 	{% endfor %}
 
