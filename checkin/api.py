@@ -4,10 +4,13 @@ import uuid
 import shelve
 import networkx as nx
 
-from fastapi import FastAPI, Response, Request, Depends  # , Form
+from fastapi import FastAPI, Response, Request, Depends, status  # , Form
 from fastapi.templating import Jinja2Templates
 from typing import Optional
 #from fastapi.staticfiles import StaticFiles
+from fastapi.encoders import jsonable_encoder
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 
 from models import Checkin, EventType
 #from sql_app import SessionLocal, engine, Base, create_checkin, create_eventtype
@@ -93,6 +96,19 @@ async def get_event_type(eventtype_id: uuid.UUID):
 @app.get("/data/")
 async def get_data():
     return DATA
+    
+############################################
+
+# Exceptions
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    print(exc.errors())
+    print(exc.body)
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content=jsonable_encoder({"detail": exc.errors(), "body": exc.body}),
+    )
     
 ############################################
 

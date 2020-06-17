@@ -5,7 +5,8 @@ import uuid
 
 
 class Checkin(BaseModel):
-    timestamp: Optional[datetime]
+    #timestamp: Optional[datetime]
+    timestamp: datetime
     event_type: uuid.UUID
     value: Optional[int]
     comments: Optional[str]

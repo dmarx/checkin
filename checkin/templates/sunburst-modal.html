@@ -134,7 +134,7 @@ function _sendJSON(){
 	let comments = modal.select('input#comments').node().value;
 	let value = modal.select('input#value').node().value;
 	//let datetime = new Date(modal.select('input#datetime').node().value).toISOString();
-	let datetime = new Date(modal.select('input#datetime').node().value);
+	let timestamp = new Date(modal.select('input#datetime').node().value);
 
 	
 
@@ -143,7 +143,7 @@ function _sendJSON(){
 
 	//let payload = {"event_type": $(this).attr("data-eventTypeId") };
 	let payload = {"event_type": event_type_id,
-				   "datetime": datetime };
+				   "timestamp": timestamp };
 
 
 	{% for var_name in ("value", "comments") %}
