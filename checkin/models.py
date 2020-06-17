@@ -9,6 +9,9 @@ class Checkin(BaseModel):
     event_type: uuid.UUID
     value: Optional[int]
     comments: Optional[str]
+    
+    class Config:
+        orm_mode = True
 
     
 class EventType(BaseModel):
@@ -16,4 +19,7 @@ class EventType(BaseModel):
     name: str
     is_checkinable: bool = True
     parent_id: Optional[uuid.UUID] = '0'
+    
+    class Config:
+        orm_mode = True
     

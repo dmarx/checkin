@@ -4,13 +4,29 @@ import uuid
 import shelve
 import networkx as nx
 
-from fastapi import FastAPI, Response, Request, Form
+from fastapi import FastAPI, Response, Request, Depends  # , Form
 from fastapi.templating import Jinja2Templates
 from typing import Optional
+#from fastapi.staticfiles import StaticFiles
 
 from models import Checkin, EventType
+#from sql_app import SessionLocal, engine, Base, create_checkin, create_eventtype
 
-from fastapi.staticfiles import StaticFiles
+from sqlalchemy.orm import Session
+from sqldatabase import engine, SessionLocal
+from sqlmodels import SqaCheckin, SqaEventType, Base
+from sqldbapi import create_checkin, create_eventtype
+
+Base.metadata.create_all(bind=engine)
+
+# Dependency
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
 
 db_path = "checkin_data.shelf"
 
@@ -44,13 +60,15 @@ with shelve.open(db_path) as db:
 # API
 
 @app.post("/checkin/")
-async def post_checkin(checkin: Checkin):
+async def post_checkin(checkin: Checkin, db_sqa: Session = Depends(get_db)):
+    print("checkin pre:", checkin)
     if not checkin.timestamp:
         checkin.timestamp = datetime.now()
     with shelve.open(db_path, writeback=True) as db:
         db['DATA'].append(checkin)
         global DATA
         DATA = db['DATA']
+    create_checkin(db_sqa, checkin)
     return True
     
 @app.post("/eventtype/")
