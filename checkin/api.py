@@ -43,6 +43,20 @@ templates = Jinja2Templates(directory="templates")
 
 ###########################################
 
+def reshape_tree(tree):
+    outv = []
+    for node in tree:
+        item = {'id': node['id'],
+                'is_checkinable': False}
+        if 'children' in node:
+            item['children'] = reshape_tree(node['children'])
+        if 'obj' in node:
+            item['parent_id'] = node['obj'].parent_id
+            item['name'] = node['obj'].name
+            item['is_checkinable'] = node['obj'].is_checkinable
+        item['value'] = 1*item['is_checkinable']
+        outv.append(item)
+    return outv
     
 ###########################################
 
@@ -97,6 +111,10 @@ async def get_event_type(eventtype_id: uuid.UUID):
 async def get_data():
     return DATA
     
+@app.get("/plot_data/")
+async def get_plot_data():
+    return reshape_tree([nx.json_graph.tree_data(G, root='0')])[0]
+    
 ############################################
 
 # Exceptions
@@ -128,7 +146,9 @@ async def tree(request: Request):
     #return templates.TemplateResponse("event_types_tree.html", {"request": request,
     #return templates.TemplateResponse("sunburst.html", {"request": request,
     return templates.TemplateResponse("sunburst-modal.html", {"request": request,
-                                      "data_tree": [nx.json_graph.tree_data(G, root='0')]}) 
+                                      "data_tree": [nx.json_graph.tree_data(G, root='0')],
+                                      "plot_data": reshape_tree([nx.json_graph.tree_data(G, root='0')])
+                                      }) 
                                       # can I call get_event_types here?
 
 @app.get("/checkin/{name}/{event_type_id}")

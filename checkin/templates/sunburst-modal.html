@@ -196,7 +196,11 @@ d3.select("div#chartId")
    
 ///////////////////////////////////////////////////////////////////////////////////
 
-data = {'name':'root',
+//let data = d3.json('/plot_data/')
+
+			
+
+data_old = {'name':'root',
          'id':'0', 
          'is_checkinable':false,
          'value':0,
@@ -658,218 +662,224 @@ data = {'name':'root',
 		
 /////////////////////////////////////////////////////////////////////		
 		
-partition = data => {
-  const root = d3.hierarchy(data)
-      .sum(d => d.value)
-      .sort((a, b) => b.value - a.value);
-  return d3.partition()
-      .size([2 * Math.PI, root.height + 1])
-    (root);
-}
+d3.json('/plot_data/').then( function(data){
+    console.log(data);
+			
+	partition = data => {
+	  const root = d3.hierarchy(data)
+		  .sum(d => d.value)
+		  .sort((a, b) => b.value - a.value);
+	  return d3.partition()
+		  .size([2 * Math.PI, root.height + 1])
+		(root);
+	}
 
-let color = d3.scaleOrdinal(d3.quantize(d3.interpolateRainbow, data.children.length + 1));
+	let color = d3.scaleOrdinal(d3.quantize(d3.interpolateRainbow, data.children.length + 1));
+
+			
+			
+	//let width = 932;
+	//let width = 600;
+	const width = vh;
+	const radius = width / 6;
+
+	const arc = d3.arc()
+		.startAngle(d => d.x0)
+		.endAngle(d => d.x1)
+		.padAngle(d => Math.min((d.x1 - d.x0) / 2, 0.005))
+		.padRadius(radius * 1.5)
+		.innerRadius(d => d.y0 * radius)
+		.outerRadius(d => Math.max(d.y0 * radius, d.y1 * radius - 1));
 		
-//let width = 932;
-//let width = 600;
-const width = vh;
-const radius = width / 6;
-
-const arc = d3.arc()
-    .startAngle(d => d.x0)
-    .endAngle(d => d.x1)
-    .padAngle(d => Math.min((d.x1 - d.x0) / 2, 0.005))
-    .padRadius(radius * 1.5)
-    .innerRadius(d => d.y0 * radius)
-    .outerRadius(d => Math.max(d.y0 * radius, d.y1 * radius - 1));
-	
-	
 		
+			
+			
+			//chart = {
+	  const root = partition(data);
+	  //const root = partition(d3.json('/plot_data/'));
+
+	  root.each(d => d.current = d);
+
+	  //const svg = d3.create("svg.sunburst-nav")
+	  const svg = d3.select("svg")
+		  //.attr("viewBox", [0, 0, width, width])
+		  .style("font", "10px sans-serif");
+
+	  // top level "g"
+	  const g = svg.append("g")
+		  .attr("transform", `translate(${width / 2},${width / 2})`);
+
+	  // Arc paths. These are already functioning expand buttons
+	  const path = g.append("g")
+		.selectAll("path")
+		.data(root.descendants().slice(1))
+		.join("path")
+		  .attr("fill", d => { while (d.depth > 1) d = d.parent; return color(d.data.name); })
+		  .attr("fill-opacity", d => arcVisible(d.current) ? (d.children ? 0.6 : 0.4) : 0)
+		  .attr("d", d => arc(d.current));
+	  
+	  // Selector for g that keeps text and rect together for labels.
+	  // They're all nested under their own g
+	  const labelg = g.append("g")
+		  .attr("class", "labels")
+		  .selectAll("g.individual_label")
+		  .data(root.descendants().slice(1))
+		  .join("g")
+		  .attr("class", "individual_label")
+		  //.attr("pointer-events", "none")
+		  //.attr("pointer-events", "visiblePoint")
+		  .attr("text-anchor", "middle")
+		  //.style("user-select", "none")
+		  .attr("id", d => "g_" + d.data.name)
+		  //
+		  .attr("fill-opacity", d => +labelVisible(d.current))
+		  .attr("transform", d => labelTransform(d.current))
+		  //.append('a')
+		  //.attr('href', d => `checkin/${d.data.name}/${d.data.id}`)
+	  ;
+	  
+	  // box around label text. Struggling to turn this into a clickable button.
+	  // path click event overrides for some reason
+	  const label_box = labelg
+		  //.append('a')
+		  //.attr('href', d => `checkin/${d.data.name}/${d.data.id}`)
+		  .append('rect')
+		  .attr("width", d => d.data.name.length * 6) // rough estimate. good enough for now
+		  .attr("height", 12)
+		  .attr("rx", 3)
+		  .attr("y", "-5")
+		  .attr("x", d => -1*( d.data.name.length * 6) / 2 )
+		  .attr("stroke", "black")
+		  .attr("stroke-opacity", d => +labelVisible(d.current))
+		  //.attr("opacity", d => +labelVisible(d.current))
+		  .attr("fill", "none")
+		  .style("cursor", "grab")
+		  ////////////
+		  .attr("stroke", "none")
+	  ;
 		
-		//chart = {
-  const root = partition(data);
+	  const label_text = labelg.append('a')
+		  //.attr('href', d => `checkin/${d.data.name}/${d.data.id}`)
+		  .attr('data-toggle', 'modal')
+		  .attr('data-target', d => `#checkinModal_${d.data.id}`)
+		  .append('text')
+		  .attr("dy", "0.35em")
+		  .text(d => d.data.name);
+	  
 
-  root.each(d => d.current = d);
+	  // Not sure what purpose the filter operation serves here.
+	  // Also unclear why this function binding seems to block my attempts to bind
+	  // functions to elements that are on top of the path.
+	  // Maybe because I attach the path after I attach the labels?
+	  // ... yup, that was it. After moving the path def up, everything seems to be working
+	  path.filter(d => d.children)
+		  .style("cursor", "pointer")
+		  .on("click", clicked);
+	  
+	  //labelg.filter(d => d.children)
+	  labelg.style("cursor", "grab")
+		  //.on("click", d => console.log(d))
+		  .append("title")
+		  .text(d => "Checkin " + d.data.name)
+	  ;
 
-  //const svg = d3.create("svg.sunburst-nav")
-  const svg = d3.select("svg")
-      //.attr("viewBox", [0, 0, width, width])
-      .style("font", "10px sans-serif");
+	  path.append("title")
+		  //.text(d => `${d.ancestors().map(d => d.data.name).reverse().join(">")}\n${format(d.value)}`);
+		  .text(d => `${d.children? 'Expand ': ''}${breadcrumbs(d)}`)
+	  ;
 
-  // top level "g"
-  const g = svg.append("g")
-      .attr("transform", `translate(${width / 2},${width / 2})`);
-
-  // Arc paths. These are already functioning expand buttons
-  const path = g.append("g")
-    .selectAll("path")
-    .data(root.descendants().slice(1))
-    .join("path")
-      .attr("fill", d => { while (d.depth > 1) d = d.parent; return color(d.data.name); })
-      .attr("fill-opacity", d => arcVisible(d.current) ? (d.children ? 0.6 : 0.4) : 0)
-      .attr("d", d => arc(d.current));
-  
-  // Selector for g that keeps text and rect together for labels.
-  // They're all nested under their own g
-  const labelg = g.append("g")
-      .attr("class", "labels")
-      .selectAll("g.individual_label")
-      .data(root.descendants().slice(1))
-      .join("g")
-      .attr("class", "individual_label")
-      //.attr("pointer-events", "none")
-      //.attr("pointer-events", "visiblePoint")
-      .attr("text-anchor", "middle")
-      //.style("user-select", "none")
-      .attr("id", d => "g_" + d.data.name)
-      //
-      .attr("fill-opacity", d => +labelVisible(d.current))
-      .attr("transform", d => labelTransform(d.current))
-	  //.append('a')
-	  //.attr('href', d => `checkin/${d.data.name}/${d.data.id}`)
-  ;
-  
-  // box around label text. Struggling to turn this into a clickable button.
-  // path click event overrides for some reason
-  const label_box = labelg
-      //.append('a')
-      //.attr('href', d => `checkin/${d.data.name}/${d.data.id}`)
-      .append('rect')
-      .attr("width", d => d.data.name.length * 6) // rough estimate. good enough for now
-      .attr("height", 12)
-      .attr("rx", 3)
-      .attr("y", "-5")
-      .attr("x", d => -1*( d.data.name.length * 6) / 2 )
-      .attr("stroke", "black")
-      .attr("stroke-opacity", d => +labelVisible(d.current))
-      //.attr("opacity", d => +labelVisible(d.current))
-      .attr("fill", "none")
-      .style("cursor", "grab")
-	  ////////////
-	  .attr("stroke", "none")
-  ;
-    
-  const label_text = labelg.append('a')
-      //.attr('href', d => `checkin/${d.data.name}/${d.data.id}`)
-	  .attr('data-toggle', 'modal')
-	  .attr('data-target', d => `#checkinModal_${d.data.id}`)
-	  .append('text')
-      .attr("dy", "0.35em")
-      .text(d => d.data.name);
-  
-
-  // Not sure what purpose the filter operation serves here.
-  // Also unclear why this function binding seems to block my attempts to bind
-  // functions to elements that are on top of the path.
-  // Maybe because I attach the path after I attach the labels?
-  // ... yup, that was it. After moving the path def up, everything seems to be working
-  path.filter(d => d.children)
-      .style("cursor", "pointer")
-      .on("click", clicked);
-  
-  //labelg.filter(d => d.children)
-  labelg.style("cursor", "grab")
-      //.on("click", d => console.log(d))
-      .append("title")
-      .text(d => "Checkin " + d.data.name)
-  ;
-
-  path.append("title")
-      //.text(d => `${d.ancestors().map(d => d.data.name).reverse().join(">")}\n${format(d.value)}`);
-      .text(d => `${d.children? 'Expand ': ''}${breadcrumbs(d)}`)
-  ;
-
-  const parent = g.append("circle")
-      .datum(root)
-      //.attr("class", "HEROOOOO!")
-      .attr("r", radius)
-      .attr("fill", "none")
-      .attr("pointer-events", "all")
-      .on("click", clicked)
-  ;
-  
-  const parent_title = parent.append('title');
-  
-  const parent_label = parent.append('text')
-      .attr("text-anchor", "middle")
-      .attr("fill", "black")
-  ;
-  
-  function breadcrumbs(d) { 
-    return `${d.ancestors().map(d => d.data.name).reverse().slice(1).join(" > ")}`
-  }
-  
-  
-  
-  
-  function clicked(p) {
-    parent.datum(p.parent || root);
-    
-    if (p.parent) {
-      parent_label.text(breadcrumbs(p)); // appears in DOM but not on screen
-      parent_title.text("Click to go back")
-    } else {
-      parent_label.text(null);
-      parent_title.text(null);
-    }
-
-    root.each(d => d.target = {
-      x0: Math.max(0, Math.min(1, (d.x0 - p.x0) / (p.x1 - p.x0))) * 2 * Math.PI,
-      x1: Math.max(0, Math.min(1, (d.x1 - p.x0) / (p.x1 - p.x0))) * 2 * Math.PI,
-      y0: Math.max(0, d.y0 - p.depth),
-      y1: Math.max(0, d.y1 - p.depth)
-    });
-
-    const t = g.transition().duration(750);
-
-    // Transition the data on all arcs, even the ones that aren’t visible,
-    // so that if this transition is interrupted, entering arcs will start
-    // the next transition from the desired position.
-    path.transition(t)
-        .tween("data", d => {
-          const i = d3.interpolate(d.current, d.target);
-          return t => d.current = i(t);
-        })
-      .filter(function(d) {
-        return +this.getAttribute("fill-opacity") || arcVisible(d.target);
-      })
-        .attr("fill-opacity", d => arcVisible(d.target) ? (d.children ? 0.6 : 0.4) : 0)
-        .attrTween("d", d => () => arc(d.current));
-
-    //label.filter(function(d) {
-    labelg.filter(function(d) {
-        return +this.getAttribute("fill-opacity") || labelVisible(d.target);
-      }).transition(t)
-        .attr("fill-opacity", d => +labelVisible(d.target))
-        .attrTween("transform", d => () => labelTransform(d.current));
-    
-    label_box.filter(function(d) {
-        return +this.getAttribute("stroke-opacity") || labelVisible(d.target);
-      }).transition(t)
-        .attr("stroke-opacity", d => +labelVisible(d.target))
-       ;
-    
-  } // end clicked()
-  
-
-  
-  function arcVisible(d) {
-    return d.y1 <= 3 && d.y0 >= 1 && d.x1 > d.x0;
-  }
-
-  function labelVisible(d) {
-    return d.y1 <= 3 && d.y0 >= 1 && (d.y1 - d.y0) * (d.x1 - d.x0) > 0.03;
-  }
-
-  function labelTransform(d) {
-    const x = (d.x0 + d.x1) / 2 * 180 / Math.PI;
-    const y = (d.y0 + d.y1) / 2 * radius;
-    return `rotate(${x - 90}) translate(${y},0) rotate(${x < 180 ? 0 : 180})`;
-  }
-
-  //return svg.node();
-//}
+	  const parent = g.append("circle")
+		  .datum(root)
+		  //.attr("class", "HEROOOOO!")
+		  .attr("r", radius)
+		  .attr("fill", "none")
+		  .attr("pointer-events", "all")
+		  .on("click", clicked)
+	  ;
+	  
+	  const parent_title = parent.append('title');
+	  
+	  const parent_label = parent.append('text')
+		  .attr("text-anchor", "middle")
+		  .attr("fill", "black")
+	  ;
+	  
+	  function breadcrumbs(d) { 
+		return `${d.ancestors().map(d => d.data.name).reverse().slice(1).join(" > ")}`
+	  }
+	  
+	  
+	  
+	  
+	  function clicked(p) {
+		parent.datum(p.parent || root);
 		
-    
+		if (p.parent) {
+		  parent_label.text(breadcrumbs(p)); // appears in DOM but not on screen
+		  parent_title.text("Click to go back")
+		} else {
+		  parent_label.text(null);
+		  parent_title.text(null);
+		}
+
+		root.each(d => d.target = {
+		  x0: Math.max(0, Math.min(1, (d.x0 - p.x0) / (p.x1 - p.x0))) * 2 * Math.PI,
+		  x1: Math.max(0, Math.min(1, (d.x1 - p.x0) / (p.x1 - p.x0))) * 2 * Math.PI,
+		  y0: Math.max(0, d.y0 - p.depth),
+		  y1: Math.max(0, d.y1 - p.depth)
+		});
+
+		const t = g.transition().duration(750);
+
+		// Transition the data on all arcs, even the ones that aren’t visible,
+		// so that if this transition is interrupted, entering arcs will start
+		// the next transition from the desired position.
+		path.transition(t)
+			.tween("data", d => {
+			  const i = d3.interpolate(d.current, d.target);
+			  return t => d.current = i(t);
+			})
+		  .filter(function(d) {
+			return +this.getAttribute("fill-opacity") || arcVisible(d.target);
+		  })
+			.attr("fill-opacity", d => arcVisible(d.target) ? (d.children ? 0.6 : 0.4) : 0)
+			.attrTween("d", d => () => arc(d.current));
+
+		//label.filter(function(d) {
+		labelg.filter(function(d) {
+			return +this.getAttribute("fill-opacity") || labelVisible(d.target);
+		  }).transition(t)
+			.attr("fill-opacity", d => +labelVisible(d.target))
+			.attrTween("transform", d => () => labelTransform(d.current));
+		
+		label_box.filter(function(d) {
+			return +this.getAttribute("stroke-opacity") || labelVisible(d.target);
+		  }).transition(t)
+			.attr("stroke-opacity", d => +labelVisible(d.target))
+		   ;
+		
+	  } // end clicked()
+	  
+
+	  
+	  function arcVisible(d) {
+		return d.y1 <= 3 && d.y0 >= 1 && d.x1 > d.x0;
+	  }
+
+	  function labelVisible(d) {
+		return d.y1 <= 3 && d.y0 >= 1 && (d.y1 - d.y0) * (d.x1 - d.x0) > 0.03;
+	  }
+
+	  function labelTransform(d) {
+		const x = (d.x0 + d.x1) / 2 * 180 / Math.PI;
+		const y = (d.y0 + d.y1) / 2 * radius;
+		return `rotate(${x - 90}) translate(${y},0) rotate(${x < 180 ? 0 : 180})`;
+	  }
+
+	  //return svg.node();
+	//}
+			
+});
 		
 		
 		</script>
