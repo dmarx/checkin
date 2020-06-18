@@ -3,6 +3,14 @@ import uuid
 import shelve
 import networkx as nx
 
+from sqldatabase import engine, SessionLocal
+from sqlmodels import SqaCheckin, SqaEventType, Base
+from sqldbapi import create_checkin, create_eventtype
+
+Base.metadata.create_all(bind=engine)
+
+sqadb = SessionLocal()
+
 spec = {'Activities of Daily Living': {
     'Chores': ['Vacuuming', 'Dishes', 'Laundry', 'Trash', 'Cooked'],
     'Hygiene': ['Brushed Teeth', 'Showered', 'Changed Clothes', 'Medications',
@@ -55,6 +63,7 @@ for k, v in spec.items():
                                parent_id=parent_id,
                                is_checkinable=is_checkinable,
                                id = new_id)
+        create_eventtype(sqadb, event_type)
         G.add_node(new_id, obj=event_type)
         G.add_edge(event_type.parent_id, event_type.id)
         name2id[event_type.name] = event_type.id

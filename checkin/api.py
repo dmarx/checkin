@@ -71,8 +71,12 @@ G.add_node('0')
 with shelve.open(db_path) as db:
     if 'DATA' in db:
         DATA = db['DATA']
+    else:
+        db['DATA'] = DATA
     if 'G' in db:
         G = db['G']
+    else:
+        db['G'] = G
         
 ###########################################
     

@@ -25,7 +25,8 @@ class SqaEventType(Base):
     name = Column(String)
     is_checkinable = Column(Boolean, default=True)
     #parent_id = Column(Integer, default='0')
-    parent_id = Column(String, ForeignKey("eventtypes.id"))
+    #parent_id = Column(String, ForeignKey("eventtypes.id"))
+    parent_id = Column(UUIDType(binary=False), ForeignKey("eventtypes.id"))
 
 """
 class SqaUser(Base):
