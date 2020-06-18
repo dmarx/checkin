@@ -1,0 +1,17 @@
+name: checkinwithme
+channels:
+  - defaults
+dependencies:
+  - aiofiles
+  - ipython
+  - jinja2
+  - networkx
+  - pytest
+  - sqlalchemy
+  - sqlalchemy-utils
+  - pip:
+    - fastapi
+    - pydantic
+    - uvicorn
+prefix: C:\Users\shagg\Anaconda3\envs\checkinwithme
+
