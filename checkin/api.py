@@ -6,16 +6,14 @@ import networkx as nx
 
 from fastapi import FastAPI, Response, Request, Depends, status  # , Form
 from fastapi.templating import Jinja2Templates
-from typing import Optional
-#from fastapi.staticfiles import StaticFiles
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+#from fastapi.staticfiles import StaticFiles
+from sqlalchemy.orm import Session
+from typing import Optional
 
 from models import Checkin, EventType
-#from sql_app import SessionLocal, engine, Base, create_checkin, create_eventtype
-
-from sqlalchemy.orm import Session
 from sqldatabase import engine, SessionLocal
 from sqlmodels import SqaCheckin, SqaEventType, Base
 from sqldbapi import create_checkin, create_eventtype
@@ -34,10 +32,6 @@ def get_db():
 db_path = "checkin_data.shelf"
 
 app = FastAPI()
-
-# Jesus.... this piece here is a mess for some reason. Screw url_for(),
-# it's uglier, but I'll just put the json directly in the template. Yeesh.
-##app.mount("/static", StaticFiles(directory="static", check_dir=True), name="static")
 
 templates = Jinja2Templates(directory="templates")
 
@@ -150,7 +144,6 @@ async def test(request: Request):
 @app.get("/tree")
 async def tree(request: Request):
     #return templates.TemplateResponse("event_types_tree.html", {"request": request,
-    #return templates.TemplateResponse("sunburst.html", {"request": request,
     return templates.TemplateResponse("sunburst-modal.html", {"request": request,
                                       "data_tree": [nx.json_graph.tree_data(G, root='0')],
                                       "plot_data": reshape_tree([nx.json_graph.tree_data(G, root='0')])
