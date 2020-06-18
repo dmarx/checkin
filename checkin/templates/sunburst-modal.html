@@ -168,10 +168,13 @@ $("button#saveModal").click(this, _sendJSON);
 
 ///////////////////////////////////////////////////////////////////////////////////
 
-		
+/*		
 const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
 const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
-		
+*/
+const vw = window.innerWidth;
+const vh = window.innerHeight;
+	
 // https://stackoverflow.com/questions/16265123/resize-svg-when-window-is-resized-in-d3-js
 d3.select("div#chartId")
    .append("div")
