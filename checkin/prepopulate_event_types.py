@@ -3,7 +3,7 @@ import uuid
 import shelve
 import networkx as nx
 
-SPEC = {'Activities of Daily Living': {
+spec = {'Activities of Daily Living': {
     'Chores': ['Vacuuming', 'Dishes', 'Laundry', 'Trash', 'Cooked'],
     'Hygiene': ['Brushed Teeth', 'Showered', 'Changed Clothes', 'Medications',
                 'Toenails', 'Beard', 'Pubic Hair'],
