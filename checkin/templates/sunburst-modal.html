@@ -249,7 +249,8 @@ d3.json('/plot_data/').then( function(data){
 			
 	//let width = 932;
 	//let width = 600;
-	const width = vh;
+	const width = Math.min(vh, vw);
+	//const width = vh;
 	const radius = width / 6;
 
 	const arc = d3.arc()
