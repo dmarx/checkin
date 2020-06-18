@@ -72,34 +72,6 @@ def fetch_event_types_graph(db: Session):
     return  build_tree(event_types)
     
 ###########################################
-
-# temporary, hyper-simple datamodel
-#DATA = []
-
-#G = nx.DiGraph()
-#G.add_node('0')
-
-#with shelve.open(db_path) as db:
-#    if 'DATA' in db:
-#        DATA = db['DATA']
-#    else:
-#        db['DATA'] = DATA
-    #if 'G' in db:
-    #    G = db['G']
-    #else:
-    #    db['G'] = G
-
-###########################################
-#SessionLocal()
-# Pull event_types into memory
-#ROOT = get_root_event_type(db)
-#G = fetch_event_types_graph(db)
-        
-#with SessionLocal() as db_sqa:
-#with engine.connect() as db_temp:
-#    ROOT = get_root_event_type(db_temp)
-    
-###########################################
     
 # API
 
@@ -108,10 +80,6 @@ async def post_checkin(checkin: Checkin, db_sqa: Session = Depends(get_db)):
     print("checkin pre:", checkin)
     if not checkin.timestamp:
         checkin.timestamp = datetime.now()
-    #with shelve.open(db_path, writeback=True) as db:
-    #    db['DATA'].append(checkin)
-    #    global DATA
-    #    DATA = db['DATA']
     create_checkin(db_sqa, checkin)
     return True
     
@@ -123,18 +91,11 @@ async def register_event_type(event_type: EventType,
     if event_type.parent_id is None:
         root = get_root_event_type(db)
         event_type.parent_id = root.id
-    #with shelve.open(db_path, writeback=True) as db:
-    #    global G
-    #    G = db['G']
-    #    G.add_node(new_id, obj=event_type)
-    #    G.add_edge(event_type.parent_id, new_id)
     create_eventtype(db, event_type)
     return new_id
 
 @app.get("/eventtype/")
-#async def get_event_types():
 async def get_event_types(db: Session = Depends(get_db)):
-    #return nx.json_graph.tree_data(G, root='0')
     G = fetch_event_types_graph(db)
     root = get_root_event_type(db)
     return nx.json_graph.tree_data(G, root=root.id)
@@ -146,13 +107,10 @@ async def get_event_type(eventtype_id: uuid.UUID):
     
 @app.get("/data/")
 async def get_data(db: Session = Depends(get_db)):
-    #return DATA
     return get_all_checkins(db)
     
 @app.get("/plot_data/")
-#async def get_plot_data():
 async def get_plot_data(db: Session = Depends(get_db)):
-    #return reshape_tree([nx.json_graph.tree_data(G, root='0')])[0]
     G = fetch_event_types_graph(db)
     root = get_root_event_type(db)
     return reshape_tree([nx.json_graph.tree_data(G, root=root.id)])[0]
