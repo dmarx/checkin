@@ -27,3 +27,7 @@ def get_root_event_type(db: Session):
 def get_all_event_types(db: Session):
     results = db.query(models.SqaEventType)
     return [schemas.EventType.from_orm(r) for r in results]
+    
+def get_all_checkins(db: Session):
+    results = db.query(models.SqaCheckin)
+    return [schemas.Checkin.from_orm(r) for r in results]

@@ -17,7 +17,8 @@ from models import Checkin, EventType
 from sqldatabase import engine, SessionLocal
 from sqlmodels import SqaCheckin, SqaEventType, Base
 from sqldbapi import create_checkin, create_eventtype, \
-                     get_root_event_type, get_all_event_types
+                     get_root_event_type, get_all_event_types, \
+                     get_all_checkins
 
 Base.metadata.create_all(bind=engine)
 
@@ -73,16 +74,16 @@ def fetch_event_types_graph(db: Session):
 ###########################################
 
 # temporary, hyper-simple datamodel
-DATA = []
+#DATA = []
 
 #G = nx.DiGraph()
 #G.add_node('0')
 
-with shelve.open(db_path) as db:
-    if 'DATA' in db:
-        DATA = db['DATA']
-    else:
-        db['DATA'] = DATA
+#with shelve.open(db_path) as db:
+#    if 'DATA' in db:
+#        DATA = db['DATA']
+#    else:
+#        db['DATA'] = DATA
     #if 'G' in db:
     #    G = db['G']
     #else:
@@ -107,10 +108,10 @@ async def post_checkin(checkin: Checkin, db_sqa: Session = Depends(get_db)):
     print("checkin pre:", checkin)
     if not checkin.timestamp:
         checkin.timestamp = datetime.now()
-    with shelve.open(db_path, writeback=True) as db:
-        db['DATA'].append(checkin)
-        global DATA
-        DATA = db['DATA']
+    #with shelve.open(db_path, writeback=True) as db:
+    #    db['DATA'].append(checkin)
+    #    global DATA
+    #    DATA = db['DATA']
     create_checkin(db_sqa, checkin)
     return True
     
@@ -144,8 +145,9 @@ async def get_event_type(eventtype_id: uuid.UUID):
     return G.nodes(data=True)[eventtype_id]['obj']
     
 @app.get("/data/")
-async def get_data():
-    return DATA
+async def get_data(db: Session = Depends(get_db)):
+    #return DATA
+    return get_all_checkins(db)
     
 @app.get("/plot_data/")
 #async def get_plot_data():
