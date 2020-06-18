@@ -15,3 +15,15 @@ def create_checkin(db: Session, checkin: schemas.Checkin):
 
 def create_eventtype(db: Session, event_type: schemas.EventType):
     return _create_sqa(db, event_type, models.SqaEventType)
+    
+def get_root_event_type(db: Session):
+    """
+    Event types form a tree beneath a common root node. This node is 
+    assigned a random unique id, but is identifiable by ~~the absence of a parent_id.~~
+    ....node.parent_id = node.id and node.name == '~ROOT~'
+    """
+    return db.query(models.SqaEventType).filter(models.SqaEventType.id == models.SqaEventType.parent_id).first()
+
+def get_all_event_types(db: Session):
+    results = db.query(models.SqaEventType)
+    return [schemas.EventType.from_orm(r) for r in results]

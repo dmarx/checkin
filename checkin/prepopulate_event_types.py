@@ -37,17 +37,28 @@ spec = {'Activities of Daily Living': {
                     'Negative Self Talk', 'Substance Use', 'Isolation',
                     'Suicidal Ideation']}
 
-# build graph from spec
-G = nx.DiGraph()
-G.add_node('0')
-# This is definitely not the most efficient way to do this. Don't care.
+# create a root node id
+ROOT_ID = uuid.uuid4()
+event_type = EventType(name="~ROOT~")
+event_type.id = ROOT_ID
+event_type.parent_id = ROOT_ID # it's either this or null. for validation, would prefer it be a non-nullable attribute
+create_eventtype(sqadb, event_type)
 
+G = nx.DiGraph()
+#G.add_node('0')
+G.add_node(ROOT_ID)
+
+# This is definitely not the most efficient way to do this. Don't care.
+# build graph from spec
 name2id = {}
 
 for ename in spec.keys():
     event_type = EventType(name=ename)
     new_id = uuid.uuid4()
     event_type.id = new_id
+    #event_type.parent_id = '0' # type error, sqlalchemy wants a CHAR(16) (i.e. a UUID)
+    event_type.parent_id = ROOT_ID
+    create_eventtype(sqadb, event_type)
     G.add_node(new_id, obj=event_type)
     G.add_edge(event_type.parent_id, new_id)
     name2id[ename] = new_id
@@ -81,6 +92,7 @@ for k, v in spec.items():
                                        parent_id=event_type.id,
                                        is_checkinable=is_checkinable2,
                                        id = new_id2)
+                create_eventtype(sqadb, event_type2)
                 G.add_node(new_id2, obj=event_type2)
                 G.add_edge(event_type2.parent_id, event_type2.id)
                 name2id[event_type2.name] = event_type2.id

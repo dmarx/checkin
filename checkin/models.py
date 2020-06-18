@@ -18,7 +18,7 @@ class EventType(BaseModel):
     id: Optional[uuid.UUID]
     name: str
     is_checkinable: bool = True
-    parent_id: Optional[uuid.UUID] = '0'
+    parent_id: Optional[uuid.UUID] = None #'0'
     
     class Config:
         orm_mode = True

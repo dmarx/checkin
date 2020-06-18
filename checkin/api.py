@@ -16,7 +16,8 @@ from typing import Optional
 from models import Checkin, EventType
 from sqldatabase import engine, SessionLocal
 from sqlmodels import SqaCheckin, SqaEventType, Base
-from sqldbapi import create_checkin, create_eventtype
+from sqldbapi import create_checkin, create_eventtype, \
+                     get_root_event_type, get_all_event_types
 
 Base.metadata.create_all(bind=engine)
 
@@ -37,6 +38,17 @@ templates = Jinja2Templates(directory="templates")
 
 ###########################################
 
+def build_tree(nodes):
+    G = nx.DiGraph()
+    #G.add_node('0')
+    edges = []
+    for n in nodes:
+        G.add_node(n.id, obj=n)
+        if not n.parent_id == n.id:
+            edges.append((n.parent_id, n.id))
+    G.add_edges_from(edges)
+    return G
+
 def reshape_tree(tree):
     outv = []
     for node in tree:
@@ -54,24 +66,38 @@ def reshape_tree(tree):
         outv.append(item)
     return outv
     
+def fetch_event_types_graph(db: Session):
+    event_types = get_all_event_types(db)
+    return  build_tree(event_types)
+    
 ###########################################
 
 # temporary, hyper-simple datamodel
 DATA = []
 
-G = nx.DiGraph()
-G.add_node('0')
+#G = nx.DiGraph()
+#G.add_node('0')
 
 with shelve.open(db_path) as db:
     if 'DATA' in db:
         DATA = db['DATA']
     else:
         db['DATA'] = DATA
-    if 'G' in db:
-        G = db['G']
-    else:
-        db['G'] = G
+    #if 'G' in db:
+    #    G = db['G']
+    #else:
+    #    db['G'] = G
+
+###########################################
+#SessionLocal()
+# Pull event_types into memory
+#ROOT = get_root_event_type(db)
+#G = fetch_event_types_graph(db)
         
+#with SessionLocal() as db_sqa:
+#with engine.connect() as db_temp:
+#    ROOT = get_root_event_type(db_temp)
+    
 ###########################################
     
 # API
@@ -89,22 +115,32 @@ async def post_checkin(checkin: Checkin, db_sqa: Session = Depends(get_db)):
     return True
     
 @app.post("/eventtype/")
-async def register_event_type(event_type: EventType):
+async def register_event_type(event_type: EventType, 
+                              db: Session = Depends(get_db)):
     new_id = uuid.uuid4()
     event_type.id = new_id
-    with shelve.open(db_path, writeback=True) as db:
-        global G
-        G = db['G']
-        G.add_node(new_id, obj=event_type)
-        G.add_edge(event_type.parent_id, new_id)
+    if event_type.parent_id is None:
+        root = get_root_event_type(db)
+        event_type.parent_id = root.id
+    #with shelve.open(db_path, writeback=True) as db:
+    #    global G
+    #    G = db['G']
+    #    G.add_node(new_id, obj=event_type)
+    #    G.add_edge(event_type.parent_id, new_id)
+    create_eventtype(db, event_type)
     return new_id
 
 @app.get("/eventtype/")
-async def get_event_types():
-    return nx.json_graph.tree_data(G, root='0')
+#async def get_event_types():
+async def get_event_types(db: Session = Depends(get_db)):
+    #return nx.json_graph.tree_data(G, root='0')
+    G = fetch_event_types_graph(db)
+    root = get_root_event_type(db)
+    return nx.json_graph.tree_data(G, root=root.id)
     
 @app.get("/eventtype/{eventtype_id}", response_model=EventType)
 async def get_event_type(eventtype_id: uuid.UUID):
+    G = fetch_event_types_graph(db)
     return G.nodes(data=True)[eventtype_id]['obj']
     
 @app.get("/data/")
@@ -112,8 +148,12 @@ async def get_data():
     return DATA
     
 @app.get("/plot_data/")
-async def get_plot_data():
-    return reshape_tree([nx.json_graph.tree_data(G, root='0')])[0]
+#async def get_plot_data():
+async def get_plot_data(db: Session = Depends(get_db)):
+    #return reshape_tree([nx.json_graph.tree_data(G, root='0')])[0]
+    G = fetch_event_types_graph(db)
+    root = get_root_event_type(db)
+    return reshape_tree([nx.json_graph.tree_data(G, root=root.id)])[0]
     
 ############################################
 
@@ -142,11 +182,13 @@ async def test(request: Request):
                                       "vars_dict":{"name":"str", "parent_id":"str"}})
         
 @app.get("/tree")
-async def tree(request: Request):
+async def tree(request: Request, db: Session = Depends(get_db)):
     #return templates.TemplateResponse("event_types_tree.html", {"request": request,
+    G = fetch_event_types_graph(db)
+    root = get_root_event_type(db)
     return templates.TemplateResponse("sunburst-modal.html", {"request": request,
-                                      "data_tree": [nx.json_graph.tree_data(G, root='0')],
-                                      "plot_data": reshape_tree([nx.json_graph.tree_data(G, root='0')])
+                                      "data_tree": [nx.json_graph.tree_data(G, root=root.id)],
+                                      "plot_data": reshape_tree([nx.json_graph.tree_data(G, root=root.id)])
                                       }) 
                                       # can I call get_event_types here?
 
@@ -154,6 +196,7 @@ async def tree(request: Request):
 async def checkin(request: Request, event_type_id:uuid.UUID ):
     # In the URL pattern, {name} can be literally anything. Just using this
     # pattern for user readability. Not necessary at all. Just need the event_type_id
+    G = fetch_event_types_graph(db)
     tree = [nx.json_graph.tree_data(G, root=event_type_id)]
     event_type = tree[0]['obj']
     return templates.TemplateResponse("checkin.html", {"request": request, 
