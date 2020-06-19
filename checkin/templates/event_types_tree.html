@@ -1,7 +1,130 @@
 {% extends 'layout.html' %}
+
+{% block additional_header_imports %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" crossorigin="anonymous">
+{% endblock %}
+		
+<!--
+ https://stackoverflow.com/questions/29063244/consistent-styling-for-nested-lists-with-bootstrap
+-->
+		
+{% block inline_style %}
+
+<style>
+.just-padding {
+    padding: 15px;
+}
+
+.list-group.list-group-root {
+    padding: 0;
+    overflow: hidden;
+}
+
+.list-group.list-group-root .list-group {
+    margin-bottom: 0;
+}
+
+.list-group.list-group-root .list-group-item {
+    border-radius: 0;
+    border-width: 1px 0 0 0;
+}
+
+.list-group.list-group-root > .list-group-item:first-child {
+    border-top-width: 0;
+}
+
+.list-group.list-group-root > .list-group > .list-group-item {
+    padding-left: 30px;
+}
+
+.list-group.list-group-root > .list-group > .list-group > .list-group-item {
+    padding-left: 45px;
+}
+
+.list-group-item .fa {
+    margin-right: 5px;
+}
+
+/*
+.collapse {
+  display: none;
+  &.show {
+    display: block;
+  }
+}
+*/
+</style>
+
+{% endblock %}
 	
 {% block body %}
 
+<body>
+
+
+<!---------------------------------------------------------------->
+
+<div class="just-padding">
+  <div class="list-group list-group-root well">
+	{%- for item in data_tree recursive %}
+		{%- if item.obj %}
+		<a href="#
+		    {%- if item.children -%}
+			{{ item.id }}
+			{%- endif -%}
+		" class="list-group-item list-group-item-action 
+			{%- if item.children -%}
+			" data-toggle="collapse
+			{%- endif -%}
+		">
+
+			{%- if item.children %}
+			<i class="fa fa-caret-right"></i>
+			{%- endif %}
+		{{- item.obj.name }}
+		</a>
+		
+		{%- endif %}
+		
+		{%- if item.children %}
+		<div class="list-group collapse" id="{{ item.id }}">
+			{{ loop(item.children) }}
+		</div>
+		{% endif %}
+	{%- endfor %}
+  </div>
+</div>  
+
+<!---------------------------------------------------------------->
+
+
+<div class="just-padding">
+
+  <div class="list-group list-group-root">
+
+    <a href="#item-1" class="list-group-item list-group-item-action" data-toggle="collapse">
+      <i class="fa fa-caret-right"></i>Item 1
+    </a>
+    <div class="list-group collapse" id="item-1">
+
+      <a href="#item-1-1" class="list-group-item list-group-item-action" data-toggle="collapse">
+        <i class="fa fa-caret-right"></i>Item 1.1
+      </a>
+	  
+      <div class="list-group collapse" id="item-1-1">
+        <a href="#" class="list-group-item list-group-item-action">Item 1.1.1</a>
+        <a href="#" class="list-group-item list-group-item-action">Item 1.1.2</a>
+      </div>
+
+    </div> 
+  </div>
+  
+</div>
+
+<!---------------------------------------------------------------->
+
+<!--
 <ul class="sitemap">
 {%- for item in data_tree recursive %}
 	{%- if item.obj -%}
@@ -14,5 +137,27 @@
 </ul>
 
 {{ data_tree|pprint }}
+
+-->
+
+<script>
+
+//https://stackoverflow.com/questions/29063244/consistent-styling-for-nested-lists-with-bootstrap
+
+
+
+$(function() {
+        
+  $('.list-group-item').on('click', function() {
+    $('.fa', this)
+      .toggleClass('fa-caret-right')
+      .toggleClass('fa-caret-down');
+  });
+
+});
+
+$('.collapse').collapse();
+
+</script>
 
 {% endblock %}
