@@ -1,7 +1,5 @@
-from collections import defaultdict
 from datetime import datetime
 import uuid
-import shelve
 import networkx as nx
 
 from fastapi import FastAPI, Response, Request, Depends, status  # , Form
