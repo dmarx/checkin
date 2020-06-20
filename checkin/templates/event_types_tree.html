@@ -173,10 +173,13 @@ function _sendJSON(){
 	const timestamp = new Date(d3.select('input#datetime').node().value);
 	
 	let payload = {"timestamp": timestamp };
-	console.log("Payload", payload);
+	
 	
 	const radios = d3.selectAll("input[name^='inlineRadio']:checked");
-	
+	let items = $("input[name^='inlineRadio']:checked").serializeArray();
+	items.map(d => d['eventTypeId'] = d['name'].slice(11));
+	payload['items'] = items;
+	console.log("Payload", payload);
 	
 	//let event_type_id = $(this).attr("data-eventTypeId");
 	//console.log(event_type_id);
