@@ -9,7 +9,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 #from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
-from typing import Optional
+from typing import Optional, List
 
 from models import Checkin, EventType
 from sqldatabase import engine, SessionLocal
@@ -79,6 +79,12 @@ async def post_checkin(checkin: Checkin, db_sqa: Session = Depends(get_db)):
     if not checkin.timestamp:
         checkin.timestamp = datetime.now()
     create_checkin(db_sqa, checkin)
+    return True
+
+@app.post("/checkinmany/")
+async def checkin_many(request: Request, checkins: List[Checkin], db: Session = Depends(get_db)):
+    for c in checkins:
+        create_checkin(db, c)
     return True
     
 @app.post("/eventtype/")
@@ -170,4 +176,3 @@ async def checkin(request: Request, event_type_id:uuid.UUID, db: Session = Depen
     event_type = tree[0]['obj']
     return templates.TemplateResponse("checkin.html", {"request": request, 
                                       "tree": tree, "event_type": event_type})
-                                      

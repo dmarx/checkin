@@ -172,14 +172,21 @@ function _sendJSON(){
 	//console.log(this);
 	const timestamp = new Date(d3.select('input#datetime').node().value);
 	
-	let payload = {"timestamp": timestamp };
+	//let payload = {"timestamp": timestamp };
 	
 	
 	const radios = d3.selectAll("input[name^='inlineRadio']:checked");
 	let items = $("input[name^='inlineRadio']:checked").serializeArray();
-	items.map(d => d['eventTypeId'] = d['name'].slice(11));
-	payload['items'] = items;
+	//items.map(d => d['eventTypeId'] = d['name'].slice(11));
+	items.map(function(d) {
+		d['event_type'] = d['name'].slice(11);
+		d['timestamp'] = timestamp;
+		delete d.name
+		});
+	//payload['items'] = items;
+	let payload = items;
 	console.log("Payload", payload);
+	//console.log("Payload", payload.items);
 	
 	//let event_type_id = $(this).attr("data-eventTypeId");
 	//console.log(event_type_id);
@@ -189,34 +196,15 @@ function _sendJSON(){
 	//let modal = d3.select('#checkinModal_' + event_type_id);
 	//let comments = modal.select('input#comments').node().value;
 	//let value = modal.select('input#value').node().value;
-	
-
-	/*
 
 	let xhr = new XMLHttpRequest(); 
-	let url = "/checkin/"; 
-
-	//let payload = {"event_type": $(this).attr("data-eventTypeId") };
-	let payload = {"event_type": event_type_id,
-				   "timestamp": timestamp };
-
-
-	{% for var_name in ("value", "comments") %}
-		Object.assign(payload, ({{ var_name }}.length > 0) && { "{{ var_name }}" : {{ var_name }} });
-	{% endfor %}
-
-	console.log(payload);
-
-	var data = JSON.stringify(payload);
-	
+	let url = "/checkinmany/"; 
+	const data = JSON.stringify(payload);
 	console.log(data);
 	
 	xhr.open("POST", url, true); 
 	xhr.setRequestHeader("Content-Type", "application/json"); 
 	xhr.send(data); 
-	
-	*/
-	
 }
 
 $("button#submitData").click(this, _sendJSON);
