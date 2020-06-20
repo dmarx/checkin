@@ -76,20 +76,42 @@
   <div class="list-group list-group-root well">
 	{%- for item in data_tree recursive %}
 		{%- if item.obj %}
-		<a href="#
-		    {%- if item.children -%}
-			x{{ item.id }}
-			{%- endif -%}
-		" class="list-group-item list-group-item-action 
-			{%- if item.children %} " data-toggle="collapse
-			{%- endif -%}
-		">
+		<div class="container">
+		<div class="row">
+		<div class=".col-xs-12">
+			<a href="#
+				{%- if item.children -%}
+				x{{ item.id }}
+				{%- endif -%}
+			" class="list-group-item list-group-item-action 
+				{%- if item.children %} " data-toggle="collapse
+				{%- endif -%}
+			">
 
-			{%- if item.children %}
-			<i class="fa fa-caret-right"></i>
-			{%- endif %}
-		{{- item.obj.name }}
-		</a>
+				{%- if item.children %}
+				<i class="fa fa-caret-right"></i>
+				{%- endif %}
+			{{- item.obj.name }}
+			</a>
+		</div>
+		{%- if item.obj.is_checkinable -%}
+			{% for i in range(1,6) %}
+				<div class=".col-xs-12 form-check form-check-inline">
+				  <input class="form-check-input" type="radio" name="inlineRadio{{ item.obj.id }}" id="inlineRadio{{ item.obj.id }}{{ i }}" value="{{ i }}">
+				  <label class="form-check-label" for="inlineRadio{{ item.obj.id }}{{ i }}">{{ i }}</label>
+				</div>
+		    {% endfor %}
+		{%- endif -%}
+		</div>
+		</div>
+		<!--
+		<div class="form-check form-check-inline">
+		  <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="option1">
+		  <label class="form-check-label" for="inlineRadio1">1</label>
+		</div>
+		-->
+			
+		
 		
 		{%- endif %}
 		
