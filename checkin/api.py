@@ -84,6 +84,8 @@ async def post_checkin(checkin: Checkin, db_sqa: Session = Depends(get_db)):
 @app.post("/checkinmany/")
 async def checkin_many(request: Request, checkins: List[Checkin], db: Session = Depends(get_db)):
     for c in checkins:
+        print("Checking in")
+        print(c)
         create_checkin(db, c)
     return True
     
