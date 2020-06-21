@@ -73,6 +73,8 @@
 <body>
 
 
+
+
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <a class="navbar-brand" href="#">Checkin</a>
   
@@ -98,14 +100,14 @@
   
 </nav>
 
-
 <div class="just-padding">
-  <div class="list-group list-group-root well">
+  <div class="list-group list-group-root ">
 	{%- for item in data_tree recursive %}
 		{%- if item.obj %}
 		<div class="container">
 		<div class="row">
-		<div class=".col-xs-12">
+		<div class=".col-xs-12 btn-group" role="group">
+
 			<a href="#
 				{%- if item.children -%}
 				x{{ item.id }}
@@ -120,6 +122,11 @@
 				{%- endif %}
 			{{- item.obj.name }}
 			</a>
+
+			
+			<a href="#modalEdit{{ item.id }}" class="btn list-group-item list-group-item-action">
+				<i class="fa fa-edit"></i>
+		    </a>
 		</div>
 		{%- if item.obj.is_checkinable -%}
 			{% for i in range(1,6) %}
