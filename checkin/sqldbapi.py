@@ -31,3 +31,6 @@ def get_all_event_types(db: Session):
 def get_all_checkins(db: Session):
     results = db.query(models.SqaCheckin)
     return [schemas.Checkin.from_orm(r) for r in results]
+    
+def update_event_type(db: Session, event_type: schemas.EventType):
+    return create_eventtype(db, event_type) # Not sure if this will work the way I want, but fuck it.

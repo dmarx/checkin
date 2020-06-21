@@ -16,7 +16,8 @@ from sqldatabase import engine, SessionLocal
 from sqlmodels import SqaCheckin, SqaEventType, Base
 from sqldbapi import create_checkin, create_eventtype, \
                      get_root_event_type, get_all_event_types, \
-                     get_all_checkins
+                     get_all_checkins, \
+                     update_event_type
 
 Base.metadata.create_all(bind=engine)
 
@@ -105,6 +106,13 @@ async def get_event_types(db: Session = Depends(get_db)):
     G = fetch_event_types_graph(db)
     root = get_root_event_type(db)
     return nx.json_graph.tree_data(G, root=root.id)
+    
+@app.put("/eventtype/")
+async def put_event_type(event_type: EventType, db: Session = Depends(get_db)):
+    result = update_event_type(db, event_type)
+    # To do: response conditional on update success. 
+    # Report to user if something went wrong.
+    return result
     
 @app.get("/eventtype/{eventtype_id}", response_model=EventType)
 async def get_event_type(eventtype_id: uuid.UUID):
