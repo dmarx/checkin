@@ -32,5 +32,20 @@ def get_all_checkins(db: Session):
     results = db.query(models.SqaCheckin)
     return [schemas.Checkin.from_orm(r) for r in results]
     
+    
+    
+    
+def _merge_sqa(db: Session, schema_model, sqa_model):
+    #db_obj = sqa_model(**schema_model.dict())
+    #db.merge(db_obj)
+    db_obj = db.query(sqa_model).filter(sqa_model.id == schema_model.id).first()
+    for k, v in schema_model.dict().items():
+        setattr(db_obj, k, v)
+    db.commit()
+    db.refresh(db_obj)
+    return db_obj
+    
 def update_event_type(db: Session, event_type: schemas.EventType):
-    return create_eventtype(db, event_type) # Not sure if this will work the way I want, but fuck it.
+    #return create_eventtype(db, event_type) # Returns an integrity error
+    return _merge_sqa(db, event_type, models.SqaEventType)
+    
