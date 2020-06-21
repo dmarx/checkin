@@ -124,9 +124,15 @@
 			</a>
 
 			
-			<a href="#modalEdit{{ item.id }}" class="btn list-group-item list-group-item-action">
+			<!--href="#" -->
+			<a 
+			   class="btn list-group-item list-group-item-action"
+			   data-toggle="modal"
+			   data-target="#modalEdit{{ item.id }}">
 				<i class="fa fa-edit"></i>
 		    </a>
+			
+			
 		</div>
 		{%- if item.obj.is_checkinable -%}
 			{% for i in range(1,6) %}
@@ -149,6 +155,8 @@
 	{%- endfor %}
   </div>
 </div>  
+
+{% include 'edit_event_type_modal.html' %}
 
 <script>
 
