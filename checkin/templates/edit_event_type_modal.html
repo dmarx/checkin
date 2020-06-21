@@ -16,29 +16,27 @@
 			  </div>
 			  <div class="modal-body">
 			    <h6 class="modal-title" id="modalEditLabel{{ item.id }}">ID: {{ item.obj.id }}</h5>
-				
-				{# ("is_checkinable", "checkbox"), #}
+
 				{% for field, type in (
 					("name","text"), 
-					
-					("parent_id", "text"), 
+					("parent_id", "text")
 					) 
 				%}
 				
 				<div class="form-group">
 					<div class="input-group mb-3">
 					  <div class="input-group-prepend">
-						<span class="input-group-text" id="basic-addon1">{{ field }}</span>
+						<span class="input-group-text">{{ field }}</span>
 					  </div>
 					  
 					  <label for="{{ field }} "class="sr-only">{{ field }}</label>
-					  <input type="{{ type }}" value="{{ item.obj[field] }}" id="{{ field }}" name="{{ field }}" class="form-control" >
+					  <input type="{{ type }}" value="{{ item.obj[field] }}" id="{{ field }}{{ item.obj.id}}" name="{{ field }}" class="form-control" >
 					</div>
 				</div>
 				{% endfor %}
 				
 				<div class="form-check">
-				  <input class="form-check-input" type="checkbox" value="" id="is_checkinable"
+				  <input class="form-check-input" type="checkbox" id="is_checkinable{{ item.obj.id}}"
 				  {%- if item.obj.is_checkinable %} checked {% endif -%}
 				  >
 				  <label class="form-check-label" for="defaultCheck1">
@@ -48,7 +46,7 @@
 				
 			  </div>
 			  <div class="modal-footer">
-				<button type="button" class="btn btn-primary" id="saveModal" data-eventTypeId="{{ item.obj.id }}" data-dismiss="modal">Save</button>
+				<button type="button" class="btn btn-primary submit-et-update" id="saveModal{{ item.obj.id }}" data-eventTypeId="{{ item.obj.id }}" data-dismiss="modal">Save</button>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
 			  </div>
 			</div>
@@ -62,4 +60,50 @@
     {%- endif %}
 {%- endfor %}
 </div>
+
+<script>
+
+
+function _putUpdateEventType(){ 
+    
+	const event_type_id = $(this).attr("data-eventTypeId");
+	console.log(event_type_id);
+	
+	
+	
+	const modal = d3.select('#modalEdit' + event_type_id);
+	//let comments = modal.select('input#comments').node().value;
+	//let value = modal.select('input#value').node().value;
+	/* let timestamp = new Date(modal.select('input#datetime').node().value); */
+	const name = modal.select('input#name' + event_type_id).node().value;
+	const parent_id = modal.select('input#parent_id' + event_type_id).node().value;
+	//const is_checkinable = modal.select('input#is_checkinable' + event_type_id).node().value;
+	const is_checkinable = $("#is_checkinable" + event_type_id).is(":checked");
+
+	let xhr = new XMLHttpRequest(); 
+	const url = "/eventtype/"; 
+
+	const payload = {'id': event_type_id,
+				     'name': name,
+					 'parent_id': parent_id,
+					 'is_checkinable': is_checkinable
+					 };
+				   
+	console.log(payload);
+
+/*
+	const data = JSON.stringify(payload);
+	
+	console.log(data);
+	
+	xhr.open("PUT", url, true); 
+	xhr.setRequestHeader("Content-Type", "application/json"); 
+	xhr.send(data); 
+*/
+	
+}
+
+$("button.submit-et-update").click(this, _putUpdateEventType);
+
+</script>
 		
