@@ -48,10 +48,14 @@
 				<h6 class="modal-title">Create Child Event Types (optional)</h6>
 				
 				<!-- Add Child from parent -->
-				<div class="form-group">
+			<div id="addchildren{{ item.obj.id }}">
+			
+				<div class="form-group add-field-template">
 					<div class="input-group mb-3">
+					
 					  <div class="input-group-prepend">
-						<button class="btn btn-outline-secondary fa fa-plus-circle" type="button"></button>
+						<button class="btn btn-outline-secondary fa fa-plus-circle" type="button"
+						id="addfield0_{{ item.obj.id }}" data-nthfield="0" data-eventTypeId="{{ item.obj.id }}"></button>
 					  </div>
 					  
 					  <label for="foobar" class="sr-only">Name</label>
@@ -67,6 +71,7 @@
 					</div>
 				</div>
 				
+			</div>
 				
 				
 			  </div>
@@ -88,6 +93,30 @@
 
 <script>
 
+/* there's almost certainly a better way to do this, but oh well. */
+function _addField(){
+	const event_type_id = $(this).attr("data-eventTypeId");
+	console.log(event_type_id);
+	
+	let modal = $("#modalEdit" + event_type_id);
+	let subform = modal.find('div#addchildren' + event_type_id);
+
+	const template = subform.find('div.add-field-template');
+	if (template.length > 1){
+		template = template.last()
+	}
+
+	const n = +template.find('button').attr('data-nthfield') + 1;
+
+	let new_node = $(template.html());
+	let new_button = new_node.find('button');
+	new_button.attr('data-nthfield', n);
+	new_button.attr('id', "addfield" + n + "_" + event_type_id );
+	new_button.click(this, _addField);
+	subform.append(new_node);
+}
+
+$("button.fa-plus-circle").click(this, _addField);
 
 function _putUpdateEventType(){ 
     
