@@ -15,7 +15,7 @@
 				</button>
 			  </div>
 			  <div class="modal-body">
-			    <h6 class="modal-title" id="modalEditLabel{{ item.id }}">ID: {{ item.obj.id }}</h5>
+			    <h6 class="modal-title" id="modalEditLabel{{ item.id }}">ID: {{ item.obj.id }}</h6>
 
 				{% for field, type in (
 					("name","text"), 
@@ -29,7 +29,7 @@
 						<span class="input-group-text">{{ field }}</span>
 					  </div>
 					  
-					  <label for="{{ field }} "class="sr-only">{{ field }}</label>
+					  <label for="{{ field }}" class="sr-only">{{ field }}</label>
 					  <input type="{{ type }}" value="{{ item.obj[field] }}" id="{{ field }}{{ item.obj.id}}" name="{{ field }}" class="form-control" >
 					</div>
 				</div>
@@ -43,6 +43,31 @@
 					Is Checkinable?
 				  </label>
 				</div>
+				
+				<hr class="mb-4">
+				<h6 class="modal-title">Create Child Event Types (optional)</h6>
+				
+				<!-- Add Child from parent -->
+				<div class="form-group">
+					<div class="input-group mb-3">
+					  <div class="input-group-prepend">
+						<button class="btn btn-outline-secondary fa fa-plus-circle" type="button"></button>
+					  </div>
+					  
+					  <label for="foobar" class="sr-only">Name</label>
+					  <input type="text" placeholder="Name" id="foobar1" name="foobar" class="form-control" >
+					  
+					  <div class="input-group-append">
+						<div class="input-group-text">
+						  <input name="checkinability" type="checkbox" id="is_checkinable{{ item.obj.id}}" checked >
+						  <span for="checkinability">Checkinable?</span>
+						</div>
+					  </div>
+					  
+					</div>
+				</div>
+				
+				
 				
 			  </div>
 			  <div class="modal-footer">
