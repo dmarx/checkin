@@ -89,10 +89,8 @@ async def checkin_many(request: Request, checkins: List[Checkin], db: Session = 
         print(c)
         create_checkin(db, c)
     return True
-    
-@app.post("/eventtype/")
-async def register_event_type(event_type: EventType, 
-                              db: Session = Depends(get_db)):
+
+def register_event_type(event_type: EventType, db: Session):
     new_id = uuid.uuid4()
     event_type.id = new_id
     if event_type.parent_id is None:
@@ -100,6 +98,13 @@ async def register_event_type(event_type: EventType,
         event_type.parent_id = root.id
     create_eventtype(db, event_type)
     return new_id
+
+@app.post("/eventtype/")
+async def register_event_types(event_types: List[EventType], 
+                              db: Session = Depends(get_db)):
+    print("Registering multiple")
+    print(event_types)
+    return [register_event_type(e, db) for e in event_types] # this feels like cheating...
 
 @app.get("/eventtype/")
 async def get_event_types(db: Session = Depends(get_db)):

@@ -84,10 +84,10 @@
 			
             xhr.open("POST", url, true); 
             xhr.setRequestHeader("Content-Type", "application/json"); 
-			var data = JSON.stringify({ "name": name.value
+			var data = JSON.stringify([{ "name": name.value
 			                            //"parent_id": parent_id.value,
 										//"is_checkinable": is_checkinable.value
-										});
+										}]);
             xhr.send(data); 
         } 
 	

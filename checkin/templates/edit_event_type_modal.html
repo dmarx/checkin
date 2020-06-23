@@ -153,11 +153,43 @@ function _putUpdateEventType(){
 	xhr.open("PUT", url, true); 
 	xhr.setRequestHeader("Content-Type", "application/json"); 
 	xhr.send(data); 
-
-	
 }
 
 $("button.submit-et-update").click(this, _putUpdateEventType);
+
+function _create_child_event_types(){
+	const event_type_id = $(this).attr("data-eventTypeId");
+	//console.log(event_type_id);
+	
+	const modal = $("#modalEdit" + event_type_id);
+	const subform = modal.find('div#addchildren' + event_type_id);
+	const children = subform.find('.input-group');
+
+	const payload = children.map(function() {
+		return {'name': $(this).find("input[type='text']").val(),
+	        'is_checkinable': $(this).find("input[type='checkbox']").is(":checked"),
+			'parent_id': event_type_id};
+			})
+			.get();
+			
+	console.log(payload);
+	const data = JSON.stringify(payload);
+	console.log(data);
+	
+	// either need to create an endpoint that takes multiple event types for registration, 
+	//or need to send this to the existing one. 
+	// ... actually, it would be pretty simple to modify the existing endpoint to just accept
+	// List[EventType], then just need to update the existing registration pages to wrap their
+	// payload in a list/array. Bing bang boom, single endpoint does all the work. 
+	// could probably use the same strategy for checkins.
+	let xhr = new XMLHttpRequest(); 
+	const url = "/eventtype/"; 
+	xhr.open("POST", url, true); 
+	xhr.setRequestHeader("Content-Type", "application/json"); 
+	xhr.send(data); 
+}
+
+$("button.submit-et-update").click(this, _create_child_event_types);
 
 </script>
 		
