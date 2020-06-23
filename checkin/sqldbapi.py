@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 
 import models as schemas
 import sqlmodels as models
@@ -32,8 +33,12 @@ def get_all_checkins(db: Session):
     results = db.query(models.SqaCheckin)
     return [schemas.Checkin.from_orm(r) for r in results]
     
-    
-    
+def get_most_recent_checkins(db: Session):
+    results = db.query(models.SqaCheckin, 
+         func.max(models.SqaCheckin.timestamp)
+        ).group_by(models.SqaCheckin.event_type)
+    checkins = [schemas.Checkin.from_orm(r) for r, _ts in results]
+    return {str(c.event_type): c for c in checkins }
     
 def _merge_sqa(db: Session, schema_model, sqa_model):
     #db_obj = sqa_model(**schema_model.dict())
