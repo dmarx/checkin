@@ -267,12 +267,17 @@ let time_elapsed_string = function(etime){
 $(async () => {
 	let json = await _get_checkin_deltas();
 	for (let [eventTypeId, obj] of Object.entries(json)) {
-		let delta_s = (Date.now() - Date.parse(obj.timestamp)) / 1000;
+		//let dt_now = Date.now().setMinutes(default_date.getMinutes() - default_date.getTimezoneOffset());
+		let dt_now = new Date();
+		//dt_now.setMinutes(dt_now.getMinutes() - dt_now.getTimezoneOffset());
+		let delta_s = (dt_now - Date.parse(obj.timestamp + 'z')) / 1000;
 		let delta_str = time_elapsed_string(delta_s);
 		let sla = 86400;
 		
 		let text_orig = $(`#expando${eventTypeId}`).text();
-		$(`#expando${eventTypeId}`).text(`${text_orig}<span class="badge badge-success">${delta_str}</span>n>`)
+		let badgeKind = delta_s > sla ? 'badge-light' : 'badge-success';
+		//$(`#expando${eventTypeId}`).append(`${text_orig}<span class="badge badge-success">${delta_str}</span>`)
+		$(`#expando${eventTypeId}`).append(`${text_orig}<span class="badge ${badgeKind}">${delta_str}</span>`)
 		/*
 		<span class="badge badge-success">Success</span>
 		<span class="badge badge-light">Light</span>
