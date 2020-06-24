@@ -21,6 +21,8 @@ from sqldbapi import create_checkin, create_eventtype, \
                      update_event_type
 
 Base.metadata.create_all(bind=engine)
+app = FastAPI()
+templates = Jinja2Templates(directory="templates")
 
 # Dependency
 def get_db():
@@ -29,13 +31,6 @@ def get_db():
         yield db
     finally:
         db.close()
-
-
-db_path = "checkin_data.shelf"
-
-app = FastAPI()
-
-templates = Jinja2Templates(directory="templates")
 
 ###########################################
     
@@ -143,7 +138,7 @@ async def tree(request: Request, db: Session = Depends(get_db)):
                                       # can I call get_event_types here?
 
 @app.get("/list")
-async def tree(request: Request, db: Session = Depends(get_db)):
+async def listview(request: Request, db: Session = Depends(get_db)):
     G = fetch_event_types_graph(db)
     root = get_root_event_type(db)
     return templates.TemplateResponse("event_types_tree.html", {"request": request,
