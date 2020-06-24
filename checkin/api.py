@@ -37,11 +37,11 @@ def get_db():
 # API
 
 @app.post("/checkin/")
-async def post_checkin(checkin: Checkin, db_sqa: Session = Depends(get_db)):
+async def post_checkin(checkin: Checkin, db: Session = Depends(get_db)):
     print("checkin pre:", checkin)
     if not checkin.timestamp:
         checkin.timestamp = datetime.now()
-    create_checkin(db_sqa, checkin)
+    create_checkin(db, checkin)
     return True
 
 @app.post("/checkinmany/")
