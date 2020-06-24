@@ -16,7 +16,7 @@ from sqldatabase import engine, SessionLocal
 from sqlmodels import SqaCheckin, SqaEventType, Base
 from sqldbapi import create_checkin, create_eventtype, \
                      get_root_event_type, get_all_event_types, \
-                     get_all_checkins, \
+                     get_all_checkins, get_most_recent_checkins, \
                      update_event_type
 
 Base.metadata.create_all(bind=engine)
@@ -89,6 +89,10 @@ async def checkin_many(request: Request, checkins: List[Checkin], db: Session = 
         print(c)
         create_checkin(db, c)
     return True
+    
+@app.get("/checkin/")
+async def get_checkins(request: Request, db: Session = Depends(get_db)):
+    return get_most_recent_checkins(db)
 
 def register_event_type(event_type: EventType, db: Session):
     new_id = uuid.uuid4()
