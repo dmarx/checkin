@@ -277,7 +277,8 @@ $(async () => {
 		let text_orig = $(`#expando${eventTypeId}`).text();
 		let badgeKind = delta_s > sla ? 'badge-light' : 'badge-success';
 		//$(`#expando${eventTypeId}`).append(`${text_orig}<span class="badge badge-success">${delta_str}</span>`)
-		$(`#expando${eventTypeId}`).append(`${text_orig}<span class="badge ${badgeKind}">${delta_str}</span>`)
+		//$(`#expando${eventTypeId}`).append(`${text_orig}<span class="badge ${badgeKind}">${delta_str}</span>`)
+		$(`#expando${eventTypeId}`).append(`<span class="badge ${badgeKind}">${delta_str}</span>`)
 		/*
 		<span class="badge badge-success">Success</span>
 		<span class="badge badge-light">Light</span>
