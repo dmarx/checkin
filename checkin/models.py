@@ -31,5 +31,5 @@ class EtInterface (BaseModel):
 	minval: Optional[int]
 	maxval: Optional[int]
     
-    class Config:
-        orm_mode = True
+    #class Config:
+    #    orm_mode = True
