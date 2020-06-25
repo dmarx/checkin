@@ -100,6 +100,16 @@
   
 </nav>
 
+
+{% macro make_input_radios(item, minval=1, maxval=5) -%}
+	{% for i in range(minval, maxval+1) %}
+		<div class="col-xs-12 form-check form-check-inline">
+		  <input class="form-check-input" type="radio" name="inlineRadio{{ item.obj.id }}" id="inlineRadio{{ item.obj.id }}{{ i }}" value="{{ i }}" data-eventTypeId="{{ item.obj.id }}">
+		  <label class="form-check-label" for="inlineRadio{{ item.obj.id }}{{ i }}">{{ i }}</label>
+		</div>
+	{% endfor %}
+{%- endmacro %}
+
 <div class="just-padding">
   <div class="list-group list-group-root ">
 	{%- for item in data_tree recursive %}
@@ -133,21 +143,12 @@
 			   data-target="#modalEdit{{ item.id }}">
 				<i class="fa fa-edit"></i>
 		    </a>
-		
-
-{% macro make_input_radios(item, minval=1, maxval=5) -%}
-	{% for i in range(minval, maxval+1) %}
-		<div class="col-xs-12 form-check form-check-inline">
-		  <input class="form-check-input" type="radio" name="inlineRadio{{ item.obj.id }}" id="inlineRadio{{ item.obj.id }}{{ i }}" value="{{ i }}" data-eventTypeId="{{ item.obj.id }}">
-		  <label class="form-check-label" for="inlineRadio{{ item.obj.id }}{{ i }}">{{ i }}</label>
-		</div>
-	{% endfor %}
-{%- endmacro %}
-		
 			
 		</div>
 		{%- if item.obj.is_checkinable -%}
-			{{ make_input_radios(item) }}
+			{%- if et_interfaces[item.obj.id].input_type == 'radios' -%}
+				{{ make_input_radios(item) }}
+			{%- endif -%} <!-- if et_interfaces... -->
 		{%- endif -%} <!--if item.obj.is_checkinable-->
 		</div>
 		</div>
