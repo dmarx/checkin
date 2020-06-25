@@ -22,4 +22,14 @@ class EventType(BaseModel):
     
     class Config:
         orm_mode = True
+
+
+class EtInterface (BaseModel):
+	event_type_id: uuid.UUID
+	value_type: str # [range, number, boolean, text]
+	input_type: str # [radios, text, checkbox, number] # redundant w/ value_type
+	minval: Optional[int]
+	maxval: Optional[int]
     
+    class Config:
+        orm_mode = True
