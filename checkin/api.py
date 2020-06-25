@@ -141,10 +141,12 @@ async def tree(request: Request, db: Session = Depends(get_db)):
 async def listview(request: Request, db: Session = Depends(get_db)):
     G = fetch_event_types_graph(db)
     root = get_root_event_type(db)
+    interface_dict = {e.event_type_id:e for e in get_etinterfaces(db)}
     return templates.TemplateResponse("event_types_tree.html", {"request": request,
     #return templates.TemplateResponse("sunburst-modal.html", {"request": request,
                                       "data_tree": [nx.json_graph.tree_data(G, root=root.id)],
-                                      "plot_data": reshape_tree([nx.json_graph.tree_data(G, root=root.id)])
+                                      "plot_data": reshape_tree([nx.json_graph.tree_data(G, root=root.id)]),
+                                      "et_interfaces": interface_dict
                                       }) 
                                       # can I call get_event_types here?
 
