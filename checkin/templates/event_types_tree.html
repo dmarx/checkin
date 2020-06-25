@@ -110,6 +110,13 @@
 	{% endfor %}
 {%- endmacro %}
 
+{% macro make_input_textfield(item) -%}
+		<div class="col-xs-12 form-group">
+		  <input class="form-control" type="text" name="inlineText{{ item.obj.id }}" id="inlineText{{ item.obj.id }}" placeholder="{{ item.obj.name }}" data-eventTypeId="{{ item.obj.id }}">
+		  <label class="sr-only" for="inlineText{{ item.obj.id }}">{{ item.obj.name }}</label>
+		</div>
+{%- endmacro %}
+
 <div class="just-padding">
   <div class="list-group list-group-root ">
 	{%- for item in data_tree recursive %}
@@ -147,7 +154,11 @@
 		</div>
 		{%- if item.obj.is_checkinable -%}
 			{%- if et_interfaces[item.obj.id].input_type == 'radios' -%}
-				{{ make_input_radios(item, et_interfaces[item.obj.id].minval, et_interfaces[item.obj.id].maxval) }}
+				{{ make_input_radios(item, 
+									 et_interfaces[item.obj.id].minval, 
+									 et_interfaces[item.obj.id].maxval) }}
+			{%- elif et_interfaces[item.obj.id].input_type == 'text' -%}
+				{{ make_input_textfield(item) }}
 			{%- endif -%} <!-- if et_interfaces... -->
 		{%- endif -%} <!--if item.obj.is_checkinable-->
 		</div>
