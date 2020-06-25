@@ -14,11 +14,11 @@ from typing import Optional, List
 from graph_utils import build_tree, reshape_tree, fetch_event_types_graph
 from models import Checkin, EventType
 from sqldatabase import engine, SessionLocal
-from sqlmodels import SqaCheckin, SqaEventType, Base
+from sqlmodels import SqaCheckin, SqaEventType, SqaEtInterface, Base
 from sqldbapi import create_checkin, create_eventtype, \
                      get_root_event_type, get_all_event_types, \
                      get_all_checkins, get_most_recent_checkins, \
-                     update_event_type
+                     update_event_type, get_etinterfaces
 
 Base.metadata.create_all(bind=engine)
 app = FastAPI()

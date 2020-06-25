@@ -40,6 +40,17 @@ def get_most_recent_checkins(db: Session):
     checkins = [schemas.Checkin.from_orm(r) for r, _ts in results]
     return {str(c.event_type): c for c in checkins }
     
+def get_etinterfaces(db: Session):
+    results = db.query(models.SqaEtInterface)
+    #return [schemas.EtInterface.from_orm(r) for r in results]
+    return [schemas.EtInterface(
+                event_type_id = r.event_type_id,
+                value_type = r.value_type,
+                input_type = r.input_type,
+                minval = r.minval,
+                maxval = r.maxval)
+            for r in results]
+    
 def _merge_sqa(db: Session, schema_model, sqa_model):
     #db_obj = sqa_model(**schema_model.dict())
     #db.merge(db_obj)
