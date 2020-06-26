@@ -18,7 +18,8 @@ from sqlmodels import SqaCheckin, SqaEventType, SqaEtInterface, Base
 from sqldbapi import create_checkin, create_eventtype, \
                      get_root_event_type, get_all_event_types, \
                      get_all_checkins, get_most_recent_checkins, \
-                     update_event_type, get_etinterfaces, create_etinterface
+                     update_event_type, get_etinterfaces, \
+                     create_etinterface, update_event_type_interface
 
 Base.metadata.create_all(bind=engine)
 app = FastAPI()
@@ -72,17 +73,20 @@ async def register_event_types(event_types: List[EventType],
     print(event_types)
     return [register_event_type(e, db) for e in event_types] # this feels like cheating...
 
-def register_event_type_interface(et_interface: EtInterface, db: Session):
-    vimap = {'range':'radios', 'number':'number', 'boolean':'checkbox', 'text':'text'}
-    if et_interface.input_type is None:
-        et_interface.input_type = vimap[et_interface.value_type]
-    create_etinterface(db, et_interface)
-    return True
+#def register_event_type_interface(et_interface: EtInterface, db: Session):
+#    create_etinterface(db, et_interface)
+#    return True
 
 @app.post("/eventtype/interface/")
 async def register_event_type_interfaces(event_type_interfaces: List[EtInterface], 
                                          db: Session = Depends(get_db)):
-    return [register_event_type_interface(e, db) for e in event_type_interfaces]
+    #return [register_event_type_interface(e, db) for e in
+    return [create_etinterface(db, e) for e in event_type_interfaces]
+    
+@app.put("/eventtype/interface/")
+async def update_event_type_interfaces(event_type_interfaces: List[EtInterface], 
+                                         db: Session = Depends(get_db)):
+    return [update_event_type_interface(db, e) for e in event_type_interfaces]
 
 @app.get("/eventtype/")
 async def get_event_types(db: Session = Depends(get_db)):

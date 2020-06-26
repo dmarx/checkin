@@ -188,7 +188,7 @@ function _putUpdateEventType(){
 	
 	let xhr2 = new XMLHttpRequest(); 
 	const url2 = "/eventtype/interface/"; 
-	xhr.open("POST", url2, true); 
+	xhr.open("PUT", url2, true); 
 	xhr.setRequestHeader("Content-Type", "application/json"); 
 	xhr.send(data2); 
 }
