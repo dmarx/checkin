@@ -184,15 +184,12 @@
 $(function() {
         
   $('.list-group-item').on('click', function() {
-    //$('.fa', this)
 	$('.fa-caret-right.fa-caret-down', this)
       .toggleClass('fa-caret-right')
       .toggleClass('fa-caret-down');
   });
 
 });
-
-//$('.collapse').collapse();
 
 ///////////////////////////////////////////////////
 
@@ -201,7 +198,6 @@ default_date.setMinutes(default_date.getMinutes() - default_date.getTimezoneOffs
 d3.selectAll('input#datetime').attr('value', default_date.toJSON().slice(0,19));
 
 ///////////////////////////////////////////////////
-
 
 function _collectRadioItems(timestamp){
 	let items_radio = $("input[name^='inlineRadio']:checked").serializeArray();
@@ -294,17 +290,14 @@ let time_elapsed_string = function(etime){
 $(async () => {
 	let json = await _get_checkin_deltas();
 	for (let [eventTypeId, obj] of Object.entries(json)) {
-		//let dt_now = Date.now().setMinutes(default_date.getMinutes() - default_date.getTimezoneOffset());
 		let dt_now = new Date();
-		//dt_now.setMinutes(dt_now.getMinutes() - dt_now.getTimezoneOffset());
 		let delta_s = (dt_now - Date.parse(obj.timestamp + 'z')) / 1000;
 		let delta_str = time_elapsed_string(delta_s);
 		let sla = 86400;
 		
 		let text_orig = $(`#expando${eventTypeId}`).text();
 		let badgeKind = delta_s > sla ? 'badge-light' : 'badge-success';
-		//$(`#expando${eventTypeId}`).append(`${text_orig}<span class="badge badge-success">${delta_str}</span>`)
-		//$(`#expando${eventTypeId}`).append(`${text_orig}<span class="badge ${badgeKind}">${delta_str}</span>`)
+
 		$(`#expando${eventTypeId}`).append(`<span class="badge ${badgeKind}">${delta_str}</span>`)
 		/*
 		<span class="badge badge-success">Success</span>
