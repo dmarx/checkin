@@ -214,14 +214,29 @@ function _sendJSON(){
 	
 	
 	const radios = d3.selectAll("input[name^='inlineRadio']:checked");
-	let items = $("input[name^='inlineRadio']:checked").serializeArray();
-	let text_items = $('input[name^="inlineText"]').filter(function() { return $(this).val(); }).serializeArray();
-	//items.map(d => d['eventTypeId'] = d['name'].slice(11));
-	items.map(function(d) {
+	let items_radio = $("input[name^='inlineRadio']:checked").serializeArray();
+	items_radio.map(function(d) {
 		d['event_type'] = d['name'].slice(11);
 		d['timestamp'] = timestamp;
-		delete d.name
+		delete d.name;
 		});
+	
+	let items_text = $('input[name^="inlineText"]').filter(function() { return $(this).val(); }).serializeArray();
+	items_text.map(function(d) {
+		d['comments'] = d['value'];
+		d['event_type'] = d['name'].slice(10);
+		d['timestamp'] = timestamp;
+		delete d.name;
+		delete d.value;
+		});
+	
+	
+	let items = [...items_radio, ...items_text];
+	console.log(items);
+	//items.map(d => d['eventTypeId'] = d['name'].slice(11));
+	
+	
+
 	//payload['items'] = items;
 	let payload = items;
 	console.log("Payload", payload);
