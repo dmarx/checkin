@@ -50,10 +50,14 @@
 					<div class="form-group col-md-6">
 					  <div class="row">
 						  <select class="custom-select col" id="value_type{{ item.obj.id}}">
-							  <option value="range" selected>range</option>
-							  <option value="boolean">boolean</option>
-							  <option value="text">text</option>
-							  <option value="number">number</option>
+						  	{% for kind in ('', 'range', 'boolean', 'text', 'number') %}
+								<option value="{{ kind }}" {%
+									if (item.obj.id in et_interfaces) 
+									    and (et_interfaces[item.obj.id].input_type == kind) -%}
+									selected
+									{%- endif -%}
+								>{{ kind }}</option>
+							{% endfor %} 
 						  </select>
 						  <label for="value_type{{ item.obj.id}}" class="col">Value Type</label>
 					  </div>
