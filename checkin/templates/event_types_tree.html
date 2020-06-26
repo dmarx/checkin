@@ -203,25 +203,24 @@ d3.selectAll('input#datetime').attr('value', default_date.toJSON().slice(0,19));
 ///////////////////////////////////////////////////
 
 
-function _sendJSON(){ 
-    
-	console.log("_sendJSON() activated");
-	//console.log(this.dataset.eventTypeId);
-	//console.log(this);
-	const timestamp = new Date(d3.select('input#datetime').node().value);
-	
-	//let payload = {"timestamp": timestamp };
-	
-	
-	const radios = d3.selectAll("input[name^='inlineRadio']:checked");
+function _collectRadioItems(timestamp){
 	let items_radio = $("input[name^='inlineRadio']:checked").serializeArray();
+	
 	items_radio.map(function(d) {
 		d['event_type'] = d['name'].slice(11);
 		d['timestamp'] = timestamp;
 		delete d.name;
 		});
-	
-	let items_text = $('input[name^="inlineText"]').filter(function() { return $(this).val(); }).serializeArray();
+		
+	return items_radio;
+}
+
+function _collectTextItems(timestamp){
+	let items_text = $('input[name^="inlineText"]')
+		.filter(function() { 
+			return $(this).val(); })
+		.serializeArray();
+		
 	items_text.map(function(d) {
 		d['comments'] = d['value'];
 		d['event_type'] = d['name'].slice(10);
@@ -229,27 +228,21 @@ function _sendJSON(){
 		delete d.name;
 		delete d.value;
 		});
-	
-	
-	let items = [...items_radio, ...items_text];
-	console.log(items);
-	//items.map(d => d['eventTypeId'] = d['name'].slice(11));
-	
-	
+		
+	return items_text;
+}
 
-	//payload['items'] = items;
-	let payload = items;
+
+function _sendJSON(){ 
+    
+	console.log("_sendJSON() activated");
+	const timestamp = new Date(d3.select('input#datetime').node().value);
+	
+	let payload = [
+		..._collectRadioItems(timestamp),
+		..._collectTextItems(timestamp)
+		];
 	console.log("Payload", payload);
-	//console.log("Payload", payload.items);
-	
-	//let event_type_id = $(this).attr("data-eventTypeId");
-	//console.log(event_type_id);
-	
-	
-	
-	//let modal = d3.select('#checkinModal_' + event_type_id);
-	//let comments = modal.select('input#comments').node().value;
-	//let value = modal.select('input#value').node().value;
 
 	let xhr = new XMLHttpRequest(); 
 	let url = "/checkinmany/"; 
