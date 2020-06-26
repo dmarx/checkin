@@ -13,6 +13,9 @@ def _create_sqa(db: Session, schema_model, sqa_model):
 
 def create_checkin(db: Session, checkin: schemas.Checkin):
     return _create_sqa(db, checkin, models.SqaCheckin)
+    
+def create_etinterface(db: Session, etinterface: schemas.EtInterface):
+    return _create_sqa(db, etinterface, models.SqaEtInterface)
 
 def create_eventtype(db: Session, event_type: schemas.EventType):
     return _create_sqa(db, event_type, models.SqaEventType)

@@ -152,7 +152,7 @@
 		    </a>
 			
 		</div>
-		{%- if item.obj.is_checkinable -%}
+		{%- if item.obj.is_checkinable and (item.obj.id in et_interfaces)  -%}
 			{%- if et_interfaces[item.obj.id].input_type == 'radios' -%}
 				{{ make_input_radios(item, 
 									 et_interfaces[item.obj.id].minval, 

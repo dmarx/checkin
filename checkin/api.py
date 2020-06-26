@@ -12,13 +12,13 @@ from sqlalchemy.orm import Session
 from typing import Optional, List
 
 from graph_utils import build_tree, reshape_tree, fetch_event_types_graph
-from models import Checkin, EventType
+from models import Checkin, EventType, EtInterface
 from sqldatabase import engine, SessionLocal
 from sqlmodels import SqaCheckin, SqaEventType, SqaEtInterface, Base
 from sqldbapi import create_checkin, create_eventtype, \
                      get_root_event_type, get_all_event_types, \
                      get_all_checkins, get_most_recent_checkins, \
-                     update_event_type, get_etinterfaces
+                     update_event_type, get_etinterfaces, create_etinterface
 
 Base.metadata.create_all(bind=engine)
 app = FastAPI()
@@ -71,6 +71,18 @@ async def register_event_types(event_types: List[EventType],
     print("Registering multiple")
     print(event_types)
     return [register_event_type(e, db) for e in event_types] # this feels like cheating...
+
+def register_event_type_interface(et_interface: EtInterface, db: Session):
+    vimap = {'range':'radios', 'number':'number', 'boolean':'checkbox', 'text':'text'}
+    if et_interface.input_type is None:
+        et_interface.input_type = vimap[et_interface.value_type]
+    create_etinterface(db, et_interface)
+    return True
+
+@app.post("/eventtype/interface/")
+async def register_event_type_interfaces(event_type_interfaces: List[EtInterface], 
+                                         db: Session = Depends(get_db)):
+    return [register_event_type_interface(e, db) for e in event_type_interfaces]
 
 @app.get("/eventtype/")
 async def get_event_types(db: Session = Depends(get_db)):
