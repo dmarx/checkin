@@ -203,7 +203,10 @@ function _create_child_event_types(){
 	const subform = modal.find('div#addchildren' + event_type_id);
 	const children = subform.find('.input-group');
 
-	const payload = children.map(function() {
+	let payload = children
+		.filter(function() { 
+			return $(this).find("input[type='text']").val(); })
+		.map(function() {
 		return {'name': $(this).find("input[type='text']").val(),
 	        'is_checkinable': $(this).find("input[type='checkbox']").is(":checked"),
 			'parent_id': event_type_id};
