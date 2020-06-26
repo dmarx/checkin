@@ -215,6 +215,7 @@ function _sendJSON(){
 	
 	const radios = d3.selectAll("input[name^='inlineRadio']:checked");
 	let items = $("input[name^='inlineRadio']:checked").serializeArray();
+	let text_items = $('input[name^="inlineText"]').filter(function() { return $(this).val(); }).serializeArray();
 	//items.map(d => d['eventTypeId'] = d['name'].slice(11));
 	items.map(function(d) {
 		d['event_type'] = d['name'].slice(11);
