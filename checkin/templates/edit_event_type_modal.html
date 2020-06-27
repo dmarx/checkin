@@ -53,15 +53,21 @@
 						  	{% for kind in ('', 'range', 'boolean', 'text', 'number') %}
 								<option value="{{ kind }}" {%
 									if (item.obj.id in et_interfaces) 
-									    and (et_interfaces[item.obj.id].input_type == kind) -%}
+									    and (et_interfaces[item.obj.id].value_type == kind) -%}
 									selected
 									{%- endif -%}
 								>{{ kind }}</option>
 							{% endfor %} 
 						  </select>
 						  <label for="value_type{{ item.obj.id}}" class="col">Value Type</label>
-						  <div class="val-type-minimax">
-							MINMAX
+						  <div class="val-type-minimax" {%
+							if (item.obj.id in et_interfaces) 
+								and (et_interfaces[item.obj.id].value_type != 'range') -%}
+							style="display: none;"
+							{%- endif -%}
+						  >
+							<input type="number" value=1>Min</input>
+							<input type="number" value=5>Max</input>
 						  </div>
 					  </div>
 					</div>
