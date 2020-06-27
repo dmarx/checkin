@@ -49,7 +49,7 @@
 					
 					<div class="form-group col-md-6">
 					  <div class="row">
-						  <select class="custom-select col" id="value_type{{ item.obj.id}}">
+						  <select class="custom-select col val-type" id="value_type{{ item.obj.id}}">
 						  	{% for kind in ('', 'range', 'boolean', 'text', 'number') %}
 								<option value="{{ kind }}" {%
 									if (item.obj.id in et_interfaces) 
@@ -60,6 +60,9 @@
 							{% endfor %} 
 						  </select>
 						  <label for="value_type{{ item.obj.id}}" class="col">Value Type</label>
+						  <div class="val-type-minimax">
+							MINMAX
+						  </div>
 					  </div>
 					</div>
 					
