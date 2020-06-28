@@ -119,7 +119,7 @@
 
 {% macro make_input_checkbox(item) -%}
 		<div class="col-xs-12 form-check form-check-inline">
-		  <input class="form-check-input" type="checkbox" name="inlineCheck{{ item.obj.id }}" id="inlineCheck{{ item.obj.id }}" data-eventTypeId="{{ item.obj.id }}">
+		  <input class="form-check-input" type="checkbox" name="inlineCheck{{ item.obj.id }}" id="inlineCheck{{ item.obj.id }}" data-eventTypeId="{{ item.obj.id }}" value=1>
 		</div>
 {%- endmacro %}
 
@@ -221,6 +221,18 @@ function _collectRadioItems(timestamp){
 	return items_radio;
 }
 
+function _collectCheckItems(timestamp){
+	let items_check = $("input[name^='inlineCheck']:checked").serializeArray();
+	
+	items_check.map(function(d) {
+		d['event_type'] = d['name'].slice(11);
+		d['timestamp'] = timestamp;
+		delete d.name;
+		});
+		
+	return items_check;
+}
+
 function _collectTextItems(timestamp){
 	let items_text = $('input[name^="inlineText"]')
 		.filter(function() { 
@@ -246,6 +258,7 @@ function _sendJSON(){
 	
 	let payload = [
 		..._collectRadioItems(timestamp),
+		..._collectCheckItems(timestamp),
 		..._collectTextItems(timestamp)
 		];
 	console.log("Payload", payload);
