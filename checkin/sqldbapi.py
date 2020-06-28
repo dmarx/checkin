@@ -4,6 +4,12 @@ from sqlalchemy import func
 import models as schemas
 import sqlmodels as models
 
+def _attach_et_interface_mapped_attrs(et_interface: schemas.EtInterface):
+    vimap = {'range':'radios', 'number':'number', 'boolean':'checkbox', 'text':'text'}
+    if et_interface.input_type is None:
+        et_interface.input_type = vimap[et_interface.value_type]
+    return et_interface
+
 def _create_sqa(db: Session, schema_model, sqa_model):
     db_obj = sqa_model(**schema_model.dict())
     db.add(db_obj)
@@ -13,6 +19,10 @@ def _create_sqa(db: Session, schema_model, sqa_model):
 
 def create_checkin(db: Session, checkin: schemas.Checkin):
     return _create_sqa(db, checkin, models.SqaCheckin)
+    
+def create_etinterface(db: Session, etinterface: schemas.EtInterface):
+    _attach_et_interface_mapped_attrs(et_interface)
+    return _create_sqa(db, etinterface, models.SqaEtInterface)
 
 def create_eventtype(db: Session, event_type: schemas.EventType):
     return _create_sqa(db, event_type, models.SqaEventType)
@@ -40,10 +50,31 @@ def get_most_recent_checkins(db: Session):
     checkins = [schemas.Checkin.from_orm(r) for r, _ts in results]
     return {str(c.event_type): c for c in checkins }
     
-def _merge_sqa(db: Session, schema_model, sqa_model):
+def get_etinterfaces(db: Session):
+    results = db.query(models.SqaEtInterface)
+    #return [schemas.EtInterface.from_orm(r) for r in results]
+    return [schemas.EtInterface(
+                event_type_id = r.event_type_id,
+                value_type = r.value_type,
+                input_type = r.input_type,
+                minval = r.minval,
+                maxval = r.maxval)
+            for r in results]
+    
+def _merge_sqa(db: Session, schema_model, sqa_model, key='id'):
     #db_obj = sqa_model(**schema_model.dict())
     #db.merge(db_obj)
-    db_obj = db.query(sqa_model).filter(sqa_model.id == schema_model.id).first()
+    #db_obj = db.query(sqa_model).filter(sqa_model.id == schema_model.id).first()
+    db_obj = db.query(sqa_model)\
+               .filter(
+                 getattr(sqa_model, key) == 
+                 getattr(schema_model, key))\
+               .first()
+    if db_obj is None:
+        print("[merge_sqa] db_obj does not exist. Creating...")
+        return _create_sqa(db=db, schema_model=schema_model, sqa_model=sqa_model)
+
+    print('[merge_sqa] db_obj:', db_obj)
     for k, v in schema_model.dict().items():
         setattr(db_obj, k, v)
     db.commit()
@@ -53,4 +84,11 @@ def _merge_sqa(db: Session, schema_model, sqa_model):
 def update_event_type(db: Session, event_type: schemas.EventType):
     #return create_eventtype(db, event_type) # Returns an integrity error
     return _merge_sqa(db, event_type, models.SqaEventType)
+    
+def update_event_type_interface(db: Session, et_interface: schemas.EtInterface):
+    _attach_et_interface_mapped_attrs(et_interface)
+    return _merge_sqa(db, 
+                      et_interface, 
+                      models.SqaEtInterface, 
+                      key='event_type_id')
     

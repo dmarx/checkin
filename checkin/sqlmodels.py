@@ -22,3 +22,12 @@ class SqaEventType(Base):
     name = Column(String)
     is_checkinable = Column(Boolean, default=True)
     parent_id = Column(UUIDType(binary=False), ForeignKey("eventtypes.id"))
+
+
+class SqaEtInterface(Base):
+    __tablename__ = "etinterfaces"
+    event_type_id = Column(UUIDType(binary=False), ForeignKey("eventtypes.id"), primary_key=True)
+    value_type = Column(String)
+    input_type = Column(String)
+    minval = Column(Integer)
+    maxval = Column(Integer)

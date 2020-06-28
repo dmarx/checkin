@@ -35,14 +35,47 @@
 				</div>
 				{% endfor %}
 				
-				<div class="form-check">
-				  <input class="form-check-input" type="checkbox" id="is_checkinable{{ item.obj.id}}"
-				  {%- if item.obj.is_checkinable %} checked {% endif -%}
-				  >
-				  <label class="form-check-label" for="defaultCheck1">
-					Is Checkinable?
-				  </label>
+				<div class="container">
+				<div class="row">
+				
+					<div class="form-check col-md-6">
+					  <input class="form-check-input" type="checkbox" id="is_checkinable{{ item.obj.id}}"
+					  {%- if item.obj.is_checkinable %} checked {% endif -%}
+					  >
+					  <label class="form-check-label" for="defaultCheck1">
+						Is Checkinable?
+					  </label>
+					</div>
+					
+					<div class="form-group col-md-6">
+					  <div class="row">
+						  <select class="custom-select col val-type" id="value_type{{ item.obj.id}}">
+						  	{% for kind in ('', 'range', 'boolean', 'text', 'number') %}
+								<option value="{{ kind }}" {%
+									if (item.obj.id in et_interfaces) 
+									    and (et_interfaces[item.obj.id].value_type == kind) -%}
+									selected
+									{%- endif -%}
+								>{{ kind }}</option>
+							{% endfor %} 
+						  </select>
+						  <label for="value_type{{ item.obj.id}}" class="col">Value Type</label>
+						  <div class="val-type-minimax" {%
+							if (item.obj.id in et_interfaces) 
+								and (et_interfaces[item.obj.id].value_type != 'range') -%}
+							style="display: none;"
+							{%- endif -%}
+						  >
+							<input type="number" value=1>Min</input>
+							<input type="number" value=5>Max</input>
+						  </div>
+					  </div>
+					</div>
+					
 				</div>
+				</div>
+				
+				
 				
 				<hr class="mb-4">
 				<h6 class="modal-title">Create Child Event Types (optional)</h6>
@@ -153,6 +186,37 @@ function _putUpdateEventType(){
 	xhr.open("PUT", url, true); 
 	xhr.setRequestHeader("Content-Type", "application/json"); 
 	xhr.send(data); 
+	
+	/////////////////
+	if (!is_checkinable){ return; }
+	console.log("is checkinable!");
+	
+	const value_type = $("#value_type" + event_type_id).val();
+	
+	let payload2 = [{'event_type_id': event_type_id,
+					  'value_type': value_type}];
+					  
+	if (value_type == 'range'){
+	
+		const minmax = $("#modalEdit" + event_type_id)
+			.find("div.val-type-minimax")
+			.find("input")
+			.map(function () {
+				return $(this).val();})
+			.get()
+		
+		payload2[0]['minval'] = minmax[0];
+		payload2[0]['maxval'] = minmax[1]
+	}
+	console.log(payload2);
+	const data2 = JSON.stringify(payload2);
+	console.log(data2);
+	
+	let xhr2 = new XMLHttpRequest(); 
+	const url2 = "/eventtype/interface/"; 
+	xhr.open("PUT", url2, true); 
+	xhr.setRequestHeader("Content-Type", "application/json"); 
+	xhr.send(data2); 
 }
 
 $("button.submit-et-update").click(this, _putUpdateEventType);
@@ -165,7 +229,10 @@ function _create_child_event_types(){
 	const subform = modal.find('div#addchildren' + event_type_id);
 	const children = subform.find('.input-group');
 
-	const payload = children.map(function() {
+	let payload = children
+		.filter(function() { 
+			return $(this).find("input[type='text']").val(); })
+		.map(function() {
 		return {'name': $(this).find("input[type='text']").val(),
 	        'is_checkinable': $(this).find("input[type='checkbox']").is(":checked"),
 			'parent_id': event_type_id};

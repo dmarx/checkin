@@ -100,6 +100,29 @@
   
 </nav>
 
+
+{% macro make_input_radios(item, minval=1, maxval=5) -%}
+	{% for i in range(minval, maxval+1) %}
+		<div class="col-xs-12 form-check form-check-inline">
+		  <input class="form-check-input" type="radio" name="inlineRadio{{ item.obj.id }}" id="inlineRadio{{ item.obj.id }}{{ i }}" value="{{ i }}" data-eventTypeId="{{ item.obj.id }}">
+		  <label class="form-check-label" for="inlineRadio{{ item.obj.id }}{{ i }}">{{ i }}</label>
+		</div>
+	{% endfor %}
+{%- endmacro %}
+
+{% macro make_input_textfield(item) -%}
+		<div class="col-xs-12 form-group">
+		  <input class="form-control" type="text" name="inlineText{{ item.obj.id }}" id="inlineText{{ item.obj.id }}" placeholder="{{ item.obj.name }}" data-eventTypeId="{{ item.obj.id }}">
+		  <label class="sr-only" for="inlineText{{ item.obj.id }}">{{ item.obj.name }}</label>
+		</div>
+{%- endmacro %}
+
+{% macro make_input_checkbox(item) -%}
+		<div class="col-xs-12 form-check form-check-inline">
+		  <input class="form-check-input" type="checkbox" name="inlineCheck{{ item.obj.id }}" id="inlineCheck{{ item.obj.id }}" data-eventTypeId="{{ item.obj.id }}" value=1>
+		</div>
+{%- endmacro %}
+
 <div class="just-padding">
   <div class="list-group list-group-root ">
 	{%- for item in data_tree recursive %}
@@ -134,15 +157,17 @@
 				<i class="fa fa-edit"></i>
 		    </a>
 			
-			
 		</div>
-		{%- if item.obj.is_checkinable -%}
-			{% for i in range(1,6) %}
-				<div class="col-xs-12 form-check form-check-inline">
-				  <input class="form-check-input" type="radio" name="inlineRadio{{ item.obj.id }}" id="inlineRadio{{ item.obj.id }}{{ i }}" value="{{ i }}" data-eventTypeId="{{ item.obj.id }}">
-				  <label class="form-check-label" for="inlineRadio{{ item.obj.id }}{{ i }}">{{ i }}</label>
-				</div>
-		    {% endfor %}
+		{%- if item.obj.is_checkinable and (item.obj.id in et_interfaces)  -%}
+			{%- if et_interfaces[item.obj.id].input_type == 'radios' -%}
+				{{ make_input_radios(item, 
+									 et_interfaces[item.obj.id].minval, 
+									 et_interfaces[item.obj.id].maxval) }}
+			{%- elif et_interfaces[item.obj.id].input_type == 'text' -%}
+				{{ make_input_textfield(item) }}
+			{%- elif et_interfaces[item.obj.id].input_type == 'checkbox' -%}
+				{{ make_input_checkbox(item) }}	 
+			{%- endif -%} <!-- if et_interfaces... -->
 		{%- endif -%} <!--if item.obj.is_checkinable-->
 		</div>
 		</div>
@@ -164,18 +189,17 @@
 
 //https://stackoverflow.com/questions/29063244/consistent-styling-for-nested-lists-with-bootstrap
 
-$(function() {
-        
+$(function() {   
   $('.list-group-item').on('click', function() {
-    //$('.fa', this)
 	$('.fa-caret-right.fa-caret-down', this)
       .toggleClass('fa-caret-right')
       .toggleClass('fa-caret-down');
   });
-
 });
 
-//$('.collapse').collapse();
+ $('select.val-type').on('change', function () {
+   $(".val-type-minimax").toggle(this.value == 'range');
+ });
 
 ///////////////////////////////////////////////////
 
@@ -185,38 +209,59 @@ d3.selectAll('input#datetime').attr('value', default_date.toJSON().slice(0,19));
 
 ///////////////////////////////////////////////////
 
+function _collectRadioItems(timestamp){
+	let items_radio = $("input[name^='inlineRadio']:checked").serializeArray();
+	
+	items_radio.map(function(d) {
+		d['event_type'] = d['name'].slice(11);
+		d['timestamp'] = timestamp;
+		delete d.name;
+		});
+		
+	return items_radio;
+}
+
+function _collectCheckItems(timestamp){
+	let items_check = $("input[name^='inlineCheck']:checked").serializeArray();
+	
+	items_check.map(function(d) {
+		d['event_type'] = d['name'].slice(11);
+		d['timestamp'] = timestamp;
+		delete d.name;
+		});
+		
+	return items_check;
+}
+
+function _collectTextItems(timestamp){
+	let items_text = $('input[name^="inlineText"]')
+		.filter(function() { 
+			return $(this).val(); })
+		.serializeArray();
+		
+	items_text.map(function(d) {
+		d['comments'] = d['value'];
+		d['event_type'] = d['name'].slice(10);
+		d['timestamp'] = timestamp;
+		delete d.name;
+		delete d.value;
+		});
+		
+	return items_text;
+}
+
 
 function _sendJSON(){ 
     
 	console.log("_sendJSON() activated");
-	//console.log(this.dataset.eventTypeId);
-	//console.log(this);
 	const timestamp = new Date(d3.select('input#datetime').node().value);
 	
-	//let payload = {"timestamp": timestamp };
-	
-	
-	const radios = d3.selectAll("input[name^='inlineRadio']:checked");
-	let items = $("input[name^='inlineRadio']:checked").serializeArray();
-	//items.map(d => d['eventTypeId'] = d['name'].slice(11));
-	items.map(function(d) {
-		d['event_type'] = d['name'].slice(11);
-		d['timestamp'] = timestamp;
-		delete d.name
-		});
-	//payload['items'] = items;
-	let payload = items;
+	let payload = [
+		..._collectRadioItems(timestamp),
+		..._collectCheckItems(timestamp),
+		..._collectTextItems(timestamp)
+		];
 	console.log("Payload", payload);
-	//console.log("Payload", payload.items);
-	
-	//let event_type_id = $(this).attr("data-eventTypeId");
-	//console.log(event_type_id);
-	
-	
-	
-	//let modal = d3.select('#checkinModal_' + event_type_id);
-	//let comments = modal.select('input#comments').node().value;
-	//let value = modal.select('input#value').node().value;
 
 	let xhr = new XMLHttpRequest(); 
 	let url = "/checkinmany/"; 
@@ -268,17 +313,14 @@ let time_elapsed_string = function(etime){
 $(async () => {
 	let json = await _get_checkin_deltas();
 	for (let [eventTypeId, obj] of Object.entries(json)) {
-		//let dt_now = Date.now().setMinutes(default_date.getMinutes() - default_date.getTimezoneOffset());
 		let dt_now = new Date();
-		//dt_now.setMinutes(dt_now.getMinutes() - dt_now.getTimezoneOffset());
 		let delta_s = (dt_now - Date.parse(obj.timestamp + 'z')) / 1000;
 		let delta_str = time_elapsed_string(delta_s);
 		let sla = 86400;
 		
 		let text_orig = $(`#expando${eventTypeId}`).text();
 		let badgeKind = delta_s > sla ? 'badge-light' : 'badge-success';
-		//$(`#expando${eventTypeId}`).append(`${text_orig}<span class="badge badge-success">${delta_str}</span>`)
-		//$(`#expando${eventTypeId}`).append(`${text_orig}<span class="badge ${badgeKind}">${delta_str}</span>`)
+
 		$(`#expando${eventTypeId}`).append(`<span class="badge ${badgeKind}">${delta_str}</span>`)
 		/*
 		<span class="badge badge-success">Success</span>
