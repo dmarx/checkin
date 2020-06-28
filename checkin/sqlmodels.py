@@ -13,6 +13,9 @@ class SqaCheckin(Base):
     event_type = Column(UUIDType(binary=False), ForeignKey("eventtypes.id"))
     value = Column(Integer)
     comments = Column(String)
+    
+    # should change `event_type` above to `event_type_id`
+    eventtype = relationship("SqaEventType", back_populates="checkins")
 
 
 class SqaEventType(Base):
@@ -22,6 +25,8 @@ class SqaEventType(Base):
     name = Column(String)
     is_checkinable = Column(Boolean, default=True)
     parent_id = Column(UUIDType(binary=False), ForeignKey("eventtypes.id"))
+    
+    checkins = relationship("SqaCheckin", back_populates="eventtype")
 
 
 class SqaEtInterface(Base):
