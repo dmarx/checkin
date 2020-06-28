@@ -192,9 +192,22 @@ function _putUpdateEventType(){
 	console.log("is checkinable!");
 	
 	const value_type = $("#value_type" + event_type_id).val();
-	const payload2 = [{'event_type_id': event_type_id,
+	
+	let payload2 = [{'event_type_id': event_type_id,
 					  'value_type': value_type}];
-				   
+					  
+	if (value_type == 'range'){
+	
+		const minmax = $("#modalEdit" + event_type_id)
+			.find("div.val-type-minimax")
+			.find("input")
+			.map(function () {
+				return $(this).val();})
+			.get()
+		
+		payload2[0]['minval'] = minmax[0];
+		payload2[0]['maxval'] = minmax[1]
+	}
 	console.log(payload2);
 	const data2 = JSON.stringify(payload2);
 	console.log(data2);
