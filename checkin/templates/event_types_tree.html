@@ -117,6 +117,12 @@
 		</div>
 {%- endmacro %}
 
+{% macro make_input_checkbox(item) -%}
+		<div class="col-xs-12 form-check form-check-inline">
+		  <input class="form-check-input" type="checkbox" name="inlineCheck{{ item.obj.id }}" id="inlineCheck{{ item.obj.id }}" data-eventTypeId="{{ item.obj.id }}">
+		</div>
+{%- endmacro %}
+
 <div class="just-padding">
   <div class="list-group list-group-root ">
 	{%- for item in data_tree recursive %}
@@ -159,6 +165,8 @@
 									 et_interfaces[item.obj.id].maxval) }}
 			{%- elif et_interfaces[item.obj.id].input_type == 'text' -%}
 				{{ make_input_textfield(item) }}
+			{%- elif et_interfaces[item.obj.id].input_type == 'checkbox' -%}
+				{{ make_input_checkbox(item) }}	 
 			{%- endif -%} <!-- if et_interfaces... -->
 		{%- endif -%} <!--if item.obj.is_checkinable-->
 		</div>
