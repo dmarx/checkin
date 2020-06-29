@@ -1,5 +1,5 @@
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 from sqlalchemy_utils import UUIDType
 
 from sqldatabase import Base
@@ -27,6 +27,10 @@ class SqaEventType(Base):
     parent_id = Column(UUIDType(binary=False), ForeignKey("eventtypes.id"))
     
     checkins = relationship("SqaCheckin", back_populates="eventtype")
+    children = relationship("SqaEventType",
+                backref=backref('parent', remote_side=[id])
+            )
+                    
 
 
 class SqaEtInterface(Base):
