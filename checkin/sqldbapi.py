@@ -1,3 +1,4 @@
+import pandas as pd
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 
@@ -91,4 +92,15 @@ def update_event_type_interface(db: Session, et_interface: schemas.EtInterface):
                       et_interface, 
                       models.SqaEtInterface, 
                       key='event_type_id')
-    
+
+def get_checkins_df(db: Session):
+    columns=['timestamp','value','comments', 'event_type']
+    checkins = db.query(models.SqaCheckin)
+    records = []
+    for c in checkins:
+        rec = {col:getattr(c, col) for col in columns}
+        rec['event_type'] = c.eventtype.name
+        rec['parent'] = c.eventtype.parent.name
+        records.append(rec)
+    return pd.DataFrame(records)
+        
