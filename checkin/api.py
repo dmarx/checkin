@@ -177,6 +177,9 @@ async def checkin(request: Request, event_type_id:uuid.UUID, db: Session = Depen
     return templates.TemplateResponse("checkin.html", {"request": request, 
                                       "tree": tree, "event_type": event_type})
                                       
-@app.get("/table/", response_class=HTMLResponse)
-async def checkins_table(db: Session = Depends(get_db)):
-    return get_checkins_df(db).to_html()
+#@app.get("/table/", response_class=HTMLResponse)
+@app.get("/table/")
+async def checkins_table(request: Request, db: Session = Depends(get_db)):
+    table = get_checkins_df(db).to_html()
+    return templates.TemplateResponse("table.html", 
+        {'request': request, 'table':table})

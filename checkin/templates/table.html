@@ -1,0 +1,15 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+
+<body>
+
+{{ table|safe }}
+
+{% endblock %}
+
+<script>
+$(document).ready(function(){
+	$('table').addClass('table');
+});
+</script>
