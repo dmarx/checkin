@@ -6,6 +6,7 @@ dependencies:
   - ipython
   - jinja2
   - networkx
+  - pandas
   - pytest
   - sqlalchemy
   - sqlalchemy-utils
