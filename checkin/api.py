@@ -6,7 +6,7 @@ from fastapi import FastAPI, Response, Request, Depends, status  # , Form
 from fastapi.templating import Jinja2Templates
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
 #from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from typing import Optional, List
@@ -19,7 +19,8 @@ from sqldbapi import create_checkin, create_eventtype, \
                      get_root_event_type, get_all_event_types, \
                      get_all_checkins, get_most_recent_checkins, \
                      update_event_type, get_etinterfaces, \
-                     create_etinterface, update_event_type_interface
+                     create_etinterface, update_event_type_interface, \
+                     get_checkins_df
 
 Base.metadata.create_all(bind=engine)
 app = FastAPI()
@@ -175,3 +176,7 @@ async def checkin(request: Request, event_type_id:uuid.UUID, db: Session = Depen
     event_type = tree[0]['obj']
     return templates.TemplateResponse("checkin.html", {"request": request, 
                                       "tree": tree, "event_type": event_type})
+                                      
+@app.get("/table/", response_class=HTMLResponse)
+async def checkins_table(db: Session = Depends(get_db)):
+    return get_checkins_df(db).to_html()
