@@ -180,6 +180,6 @@ async def checkin(request: Request, event_type_id:uuid.UUID, db: Session = Depen
 #@app.get("/table/", response_class=HTMLResponse)
 @app.get("/table/")
 async def checkins_table(request: Request, db: Session = Depends(get_db)):
-    table = get_checkins_df(db).to_html()
+    table = get_checkins_df(db).to_html(index=False)
     return templates.TemplateResponse("table.html", 
         {'request': request, 'table':table})

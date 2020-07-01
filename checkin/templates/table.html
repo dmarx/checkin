@@ -6,10 +6,15 @@
 
 {{ table|safe }}
 
-{% endblock %}
-
 <script>
 $(document).ready(function(){
-	$('table').addClass('table');
+	//$('table').addClass('table');
+	$('table').attr('class','table');
+	$('thead').find('th').attr('scope','col');
+	//$('tbody').find('th').attr('scope','row');
+	$('tbody').find('tr').attr('scope','row');
 });
 </script>
+
+{% endblock %}
+
