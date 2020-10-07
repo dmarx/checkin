@@ -1,6 +1,7 @@
 import networkx as nx
 from sqlalchemy.orm import Session
-from sqldbapi import get_all_event_types
+from sqldbapi import get_all_event_types, get_root_event_type
+from sqlmodels import SqaEventType
 
 def build_tree(nodes):
     G = nx.DiGraph()
@@ -32,3 +33,12 @@ def reshape_tree(tree):
 def fetch_event_types_graph(db: Session):
     event_types = get_all_event_types(db)
     return  build_tree(event_types)
+
+def depths_of_eventtypes_in_tree(db: Session, g: nx.DiGraph = None, root: SqaEventType = None):
+    if root is None:
+        root = get_root_event_type(db)
+    if g is None:
+        g = fetch_event_types_graph(db)
+    return nx.shortest_path_length(g, root.id)
+    
+    
