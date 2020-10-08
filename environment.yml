@@ -12,6 +12,7 @@ dependencies:
   - sqlalchemy
   - sqlalchemy-utils
   - pip:
+    - dash
     - fastapi
     - pydantic
     - uvicorn
