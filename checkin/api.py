@@ -22,9 +22,16 @@ from sqldbapi import create_checkin, create_eventtype, \
                      create_etinterface, update_event_type_interface, \
                      get_checkins_df
 
+
+
 Base.metadata.create_all(bind=engine)
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
+
+from fastapi.middleware.wsgi import WSGIMiddleware
+from dash_app import app_dash
+
+app.mount("/dash", WSGIMiddleware(app_dash.server))
 
 # Dependency
 def get_db():
@@ -187,3 +194,4 @@ async def checkins_table(request: Request, db: Session = Depends(get_db)):
     table = get_checkins_df(db).to_html(index=False)
     return templates.TemplateResponse("table.html", 
         {'request': request, 'table':table})
+        
