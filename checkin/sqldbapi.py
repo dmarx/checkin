@@ -44,12 +44,32 @@ def get_all_checkins(db: Session):
     results = db.query(models.SqaCheckin)
     return [schemas.Checkin.from_orm(r) for r in results]
     
-def get_most_recent_checkins(db: Session):
+def _most_recent_sqacheckins(db: Session):
     results = db.query(models.SqaCheckin, 
          func.max(models.SqaCheckin.timestamp)
         ).group_by(models.SqaCheckin.event_type)
+    return results
+    
+def get_most_recent_checkins(db: Session):
+    results = _most_recent_sqacheckins(db)
     checkins = [schemas.Checkin.from_orm(r) for r, _ts in results]
     return {str(c.event_type): c for c in checkins }
+    
+def get_most_recent_checkins_propagated_to_ancestors(db: Session):
+    results = _most_recent_sqacheckins(db)
+    #most_recent = {c.eventtype.id:c for c, ts in results}
+    most_recent = get_most_recent_checkins(db)
+    for c, ts in results:
+        parent = c.eventtype.parent
+        c_obj = schemas.Checkin.from_orm(c)
+        while parent and (parent.parent is not parent):
+            pid = str(parent.id)
+            if pid not in most_recent:
+                most_recent[pid] = c_obj #ts
+            elif most_recent[pid].timestamp < ts:
+                most_recent[pid] = c_obj
+            parent = parent.parent
+    return most_recent
     
 def get_etinterfaces(db: Session):
     results = db.query(models.SqaEtInterface)

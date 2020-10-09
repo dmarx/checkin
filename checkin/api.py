@@ -20,7 +20,8 @@ from sqldbapi import create_checkin, create_eventtype, \
                      get_all_checkins, get_most_recent_checkins, \
                      update_event_type, get_etinterfaces, \
                      create_etinterface, update_event_type_interface, \
-                     get_checkins_df
+                     get_checkins_df, \
+                     get_most_recent_checkins_propagated_to_ancestors
 
 
 
@@ -124,6 +125,10 @@ async def get_plot_data(db: Session = Depends(get_db)):
     root = get_root_event_type(db)
     return reshape_tree([nx.json_graph.tree_data(G, root=root.id)])[0]
     
+@app.get("/mostrecent/")
+async def get_most_recent(db: Session = Depends(get_db)):
+    return get_most_recent_checkins_propagated_to_ancestors(db)
+
 ############################################
 
 # Exceptions
