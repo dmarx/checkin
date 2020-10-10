@@ -52,6 +52,7 @@ df_scalar_day = (df_scalar
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
+import pandas as pd
 import plotly
 import plotly.graph_objs as go
 
@@ -85,21 +86,54 @@ app_dash.layout = html.Div([
                 {'label': 'Time on X', 'value':0}
             ],
             value=0
-        )  
+        ),
+    dcc.DatePickerRange(
+            id='my-date-picker-range',
+            min_date_allowed=df_scalar['timestamp'].min(),
+            max_date_allowed=df_scalar['timestamp'].max(),
+            start_date=df_scalar['timestamp'].min(),
+            end_date=df_scalar['timestamp'].max()
+        ),    
+        # Hidden div inside the app that stores the intermediate value
+        html.Div(id='df_processed', style={'display': 'none'})
     ]),
     dcc.Graph(id='graph'),
+    
 ])
 
+@app_dash.callback(Output('df_processed', 'children'),
+                  [Input('my-date-picker-range', 'start_date'),
+                   Input('my-date-picker-range', 'end_date')])
+def process_data(#df, 
+                 dt_start=None,
+                 dt_end=None
+                ):
+    dt_agg= df_scalar['timestamp'].dt.week
+    aggs = ['min', 'max', 'sum', 'count']
+    df = df_scalar
+    if dt_start is None:
+        dt_start = df['timestamp'].min()
+    if dt_end is None:
+        dt_end = df['timestamp'].max()
+    #df = df[dt_start <= df['timestamp'] <= dt_end]
+    df = df[dt_start <= df['timestamp']]
+    df = df[df['timestamp'] <= dt_end]
+    grpd = df.groupby([dt_agg, 'parent', 'event_type'])
+    outv = grpd['value'].agg(aggs).reset_index().rename(columns={'timestamp':'week'})
+    print("data processed")
+    return outv.to_json(None)
+    
 
 # Define callback to update graph
 @app_dash.callback(Output('graph', 'figure'),
              [Input('parent-dropdown', 'value'),
               Input('agg-dropdown', 'value'),
               Input('chart-type', 'value'),
-              Input('checkbox-flip-xy', 'value')
+              Input('checkbox-flip-xy', 'value'),
+              Input('df_processed', 'children')
              ])
-def update_figure(parent, agg, ctype, flipxy):
-    df_sub1 = df_scalar_wk[df_scalar_wk['parent'] == parent]
+def update_figure(parent, agg, ctype, flipxy, json_df):
+    df_sub1 = pd.read_json(json_df)
     traces = []
     xcol = 'week'
     grpcol = 'event_type'
