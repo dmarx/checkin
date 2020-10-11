@@ -108,19 +108,22 @@ def process_data(#df,
                  dt_start=None,
                  dt_end=None
                 ):
-    dt_agg= df_scalar['timestamp'].dt.week
     aggs = ['min', 'max', 'sum', 'count']
-    df = df_scalar
+    df = df_scalar.copy()
+    #print(dt_start, dt_end)
     if dt_start is None:
         dt_start = df['timestamp'].min()
     if dt_end is None:
         dt_end = df['timestamp'].max()
+    #print(dt_start, dt_end)
     #df = df[dt_start <= df['timestamp'] <= dt_end]
     df = df[dt_start <= df['timestamp']]
     df = df[df['timestamp'] <= dt_end]
+    dt_agg= df['timestamp'].dt.week
     grpd = df.groupby([dt_agg, 'parent', 'event_type'])
     outv = grpd['value'].agg(aggs).reset_index().rename(columns={'timestamp':'week'})
-    print("data processed")
+    #print(outv['week'].min(), outv['week'].max())
+    #print("data processed")
     return outv.to_json(None)
     
 
@@ -134,6 +137,7 @@ def process_data(#df,
              ])
 def update_figure(parent, agg, ctype, flipxy, json_df):
     df_sub1 = pd.read_json(json_df)
+    df_sub1 = df_sub1[df_sub1['parent'] == parent]
     traces = []
     xcol = 'week'
     grpcol = 'event_type'
