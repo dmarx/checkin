@@ -84,11 +84,11 @@ if __name__ == '__main__':
     ############
         
     flipxy = False
-    if st.checkbox('Event/Time on X-Axis'):
+    if st.sidebar.checkbox('Event/Time on X-Axis'):
         flipxy = True
         
     ctype='group'
-    if st.checkbox('Grouped/Stacked'):
+    if st.sidebar.checkbox('Grouped/Stacked'):
         ctype='stack'
     
     fig = update_figure(df, flipxy=flipxy, ctype=ctype) 
@@ -102,14 +102,16 @@ if __name__ == '__main__':
     ##########
 
     fig
-
-    "# Checkins"
-
-    df_data[['timestamp','event_type','value']]
-
-    "# Checkin Comments"
-
-    df_text[['timestamp','comments','event_type',]]
+    
+    data_container = st.beta_container()
+    col1, col2 = st.beta_columns(2)
+    with data_container:
+        with col1:
+            "# Checkins"
+            df_data[['timestamp','event_type','value']]
+        with col2:
+            "# Checkin Comments"
+            df_text[['timestamp','comments','event_type',]]
 
     ######################
 
