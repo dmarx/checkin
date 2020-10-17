@@ -21,17 +21,20 @@ def get_data(db):
     return df_data, df_scalar, df_text
 
 @st.cache
-def process_data(df, 
+def apply_date_filter(df, 
                  dt_start=None,
-                 dt_end=None
-                ):
-    aggs = ['min', 'max', 'sum', 'count']
+                 dt_end=None):
     if dt_start is None:
         dt_start = df['timestamp'].min()
     if dt_end is None:
         dt_end = df['timestamp'].max()
     df = df[dt_start <= df['timestamp']]
     df = df[df['timestamp'] <= dt_end]
+    return df
+
+@st.cache
+def process_data(df):
+    aggs = ['min', 'max', 'sum', 'count']
     dt_agg= df['timestamp'].dt.week
     grpd = df.groupby([dt_agg, 'parent', 'event_type'])
     outv = grpd['value'].agg(aggs).reset_index().rename(columns={'timestamp':'week'})
@@ -72,7 +75,8 @@ if __name__ == '__main__':
     #df_data, df_scalar , df_scalar_wk, df_text = get_data(db)
     df_data, df_scalar, df_text = get_data(db)
     #df_data, df_scalar, df_text = get_data()
-    df = process_data(df_scalar.copy())
+    df = apply_date_filter(df_scalar)
+    df = process_data(df)
     df = filter_parent(df)
     
     ######################
