@@ -37,7 +37,7 @@ def get_data(db):
     #return df_data
 
 
-
+@st.cache
 def process_data(#df, 
                  dt_start=None,
                  dt_end=None
@@ -87,15 +87,27 @@ def update_figure(json_df,
 
 if __name__ == '__main__':
     
-
     ######################
     # Processing #
     ##############
 
     df_data, df_scalar, df_scalar_wk, df_text = get_data(db)
     d = process_data()
-    fig = update_figure(d) 
-
+    
+    ######################
+    # Controls #
+    ############
+        
+    flipxy = False
+    if st.checkbox('Event/Time on X-Axis'):
+        flipxy = True
+    
+    fig = update_figure(d, flipxy=flipxy) 
+    
+    fig.update_layout(barmode='group')
+    if st.checkbox('Grouped/Stacked'):
+        fig.update_layout(barmode='stack')  
+    
     ######################
     # Layout #
     ##########
@@ -108,7 +120,7 @@ if __name__ == '__main__':
 
     "# Checkin Comments"
 
-    df_text[['timestamp','event_type','comments']]
+    df_text[['timestamp','comments','event_type',]]
 
     ######################
 
