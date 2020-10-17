@@ -18,7 +18,7 @@ def get_data(db):
     idx_text = df_data['comments'].notnull()
     df_text   = df_data[idx_text]
     df_scalar = df_data[idx_valued]
-    return df_data.copy(), df_scalar.copy(), df_text.copy()
+    return df_data, df_scalar, df_text
 
 @st.cache
 def process_data(df, 
@@ -39,7 +39,6 @@ def process_data(df,
     
 @st.cache
 def filter_parent(df, parent='Chores'):
-    #df_sub1[df_sub1['parent'] == parent]
     return df[df['parent'] == parent]
     
 def update_figure(df,
