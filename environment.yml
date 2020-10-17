@@ -16,3 +16,4 @@ dependencies:
     - fastapi
     - pydantic
     - uvicorn
+    - streamlit
