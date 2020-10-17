@@ -77,12 +77,14 @@ if __name__ == '__main__':
     #df_data, df_scalar, df_text = get_data()
     df = apply_date_filter(df_scalar)
     df = process_data(df)
-    df = filter_parent(df)
     
     ######################
     # Controls #
     ############
-        
+    
+    parent = st.sidebar.selectbox('Event Parent Type', df['parent'].unique())
+    df = filter_parent(df, parent)
+    
     flipxy = False
     if st.sidebar.checkbox('Event/Time on X-Axis'):
         flipxy = True
@@ -91,11 +93,7 @@ if __name__ == '__main__':
     if st.sidebar.checkbox('Grouped/Stacked'):
         ctype='stack'
     
-    fig = update_figure(df, flipxy=flipxy, ctype=ctype) 
-    
-    #fig.update_layout(barmode='group')
-    #if st.checkbox('Grouped/Stacked'):
-    #    fig.update_layout(barmode='stack')  
+    fig = update_figure(df, flipxy=flipxy, ctype=ctype)  
     
     ######################
     # Layout #
