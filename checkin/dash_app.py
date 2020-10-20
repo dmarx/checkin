@@ -12,43 +12,8 @@ Another good prospect (which looks like it's using basically the same strategy w
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-
-# Create the Dash application, make sure to adjust requests_pathname_prefx
-app_dash = dash.Dash(__name__, requests_pathname_prefix='/dash/')
-
-
 from sqldatabase import SessionLocal
 from sqldbapi import get_checkins_df
-
-db = SessionLocal()
-df_data = get_checkins_df(db)
-
-idx_valued = df_data['value'].notnull()
-idx_text = df_data['comments'].notnull()
-
-df_text   = df_data[idx_text]
-df_scalar = df_data[idx_valued]
-
-df_scalar_wk = (df_scalar
-                    .groupby([df_scalar['timestamp'].dt.week, 'parent', 'event_type'])
-                    ['value']
-                    #.count()
-                    .agg(['min', 'max', 'sum', 'count'])
-                    .reset_index()
-                    .rename(columns={'timestamp':'week'})
-               )
-
-df_scalar_day = (df_scalar
-                    .groupby([df_scalar['timestamp'].dt.day, 'parent', 'event_type'])
-                    ['value']
-                    #.count()
-                    .agg(['min', 'max', 'sum', 'count'])
-                    .reset_index()
-                    .rename(columns={'timestamp':'day'})
-               )
-
-
-
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
@@ -56,50 +21,34 @@ import pandas as pd
 import plotly
 import plotly.graph_objs as go
 
-app_dash.layout = html.Div([
-    html.H1("Checkin data grouped by week"),
-    html.Label([
-        "Parent",
-        dcc.Dropdown(
-            id='parent-dropdown', clearable=False,
-            value='Chores', options=[
-                {'label': c, 'value': c}
-                for c in df_scalar_wk['parent'].unique()
-            ]),
-        dcc.RadioItems(
-            id='agg-dropdown', 
-            #clearable=False,
-            value='count', options=[
-                {'label': c, 'value': c}
-                for c in ['min', 'max', 'sum', 'count']
-            ]),
-        dcc.RadioItems(
-                id='chart-type',
-                options=[{'label': i, 'value': i} for i in ['Grouped', 'Stacked']],
-                value='Grouped',
-                #labelStyle={'display': 'inline-block'}
-            ),
-        dcc.RadioItems(
-            id='checkbox-flip-xy',
-            options=[
-                {'label': 'Event on X', 'value': 1},
-                {'label': 'Time on X', 'value':0}
-            ],
-            value=0
-        ),
-    dcc.DatePickerRange(
-            id='my-date-picker-range',
-            min_date_allowed=df_scalar['timestamp'].min(),
-            max_date_allowed=df_scalar['timestamp'].max(),
-            start_date=df_scalar['timestamp'].min(),
-            end_date=df_scalar['timestamp'].max()
-        ),    
-        # Hidden div inside the app that stores the intermediate value
-        html.Div(id='df_processed', style={'display': 'none'})
-    ]),
-    dcc.Graph(id='graph'),
+app_dash = dash.Dash(__name__, requests_pathname_prefix='/dash/')
+
+def fetch_data(db):
     
-])
+    df_data = get_checkins_df(db)
+
+    idx_valued = df_data['value'].notnull()
+    idx_text = df_data['comments'].notnull()
+
+    df_text   = df_data[idx_text]
+    df_scalar = df_data[idx_valued]
+
+    df_scalar_wk = (df_scalar
+                        .groupby([df_scalar['timestamp'].dt.week, 'parent', 'event_type'])
+                        ['value']
+                        .agg(['min', 'max', 'sum', 'count'])
+                        .reset_index()
+                        .rename(columns={'timestamp':'week'})
+                   )
+
+    df_scalar_day = (df_scalar
+                        .groupby([df_scalar['timestamp'].dt.day, 'parent', 'event_type'])
+                        ['value']
+                        .agg(['min', 'max', 'sum', 'count'])
+                        .reset_index()
+                        .rename(columns={'timestamp':'day'})
+                   )
+    return df_text, df_scalar, df_scalar_wk, df_scalar_day
 
 @app_dash.callback(Output('df_processed', 'children'),
                   [Input('my-date-picker-range', 'start_date'),
@@ -154,3 +103,54 @@ def update_figure(parent, agg, ctype, flipxy, json_df):
     if ctype == 'Stacked':
         fig.update_layout(barmode='stack')        
     return fig
+    
+#######################
+
+# Create the Dash application, make sure to adjust requests_pathname_prefx
+db = SessionLocal()
+df_text, df_scalar, df_scalar_wk, df_scalar_day = fetch_data(db)
+
+app_dash.layout = html.Div([
+    html.H1("Checkin data grouped by week"),
+    html.Label([
+        "Parent",
+        dcc.Dropdown(
+            id='parent-dropdown', clearable=False,
+            value='Chores', options=[
+                {'label': c, 'value': c}
+                for c in df_scalar_wk['parent'].unique()
+            ]),
+        dcc.RadioItems(
+            id='agg-dropdown', 
+            #clearable=False,
+            value='count', options=[
+                {'label': c, 'value': c}
+                for c in ['min', 'max', 'sum', 'count']
+            ]),
+        dcc.RadioItems(
+                id='chart-type',
+                options=[{'label': i, 'value': i} for i in ['Grouped', 'Stacked']],
+                value='Grouped',
+                #labelStyle={'display': 'inline-block'}
+            ),
+        dcc.RadioItems(
+            id='checkbox-flip-xy',
+            options=[
+                {'label': 'Event on X', 'value': 1},
+                {'label': 'Time on X', 'value':0}
+            ],
+            value=0
+        ),
+    dcc.DatePickerRange(
+            id='my-date-picker-range',
+            min_date_allowed=df_scalar['timestamp'].min(),
+            max_date_allowed=df_scalar['timestamp'].max(),
+            start_date=df_scalar['timestamp'].min(),
+            end_date=df_scalar['timestamp'].max()
+        ),    
+        # Hidden div inside the app that stores the intermediate value
+        html.Div(id='df_processed', style={'display': 'none'})
+    ]),
+    dcc.Graph(id='graph'),
+    
+])
