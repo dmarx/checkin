@@ -51,14 +51,16 @@ def fetch_data(db):
     return df_text, df_scalar, df_scalar_wk, df_scalar_day
 
 @app_dash.callback(Output('df_processed', 'children'),
-                  [Input('my-date-picker-range', 'start_date'),
+                  [Input('df_scalar', 'children'),
+                   Input('my-date-picker-range', 'start_date'),
                    Input('my-date-picker-range', 'end_date')])
-def process_data(#df, 
+def process_data(json_df, 
                  dt_start=None,
                  dt_end=None
                 ):
     aggs = ['min', 'max', 'sum', 'count']
-    df = df_scalar.copy()
+    #df = df_scalar.copy()
+    df = pd.read_json(json_df)
     #print(dt_start, dt_end)
     if dt_start is None:
         dt_start = df['timestamp'].min()
@@ -104,6 +106,12 @@ def update_figure(parent, agg, ctype, flipxy, json_df):
         fig.update_layout(barmode='stack')        
     return fig
     
+@app_dash.callback(Output('df_scalar', 'children')
+                  ,[Input('refresh-data', 'value')])
+def refresh_data(n_clicks):
+    df_text, df_scalar, df_scalar_wk, df_scalar_day = fetch_data(db)
+    return df_scalar.to_json(None)
+
 #######################
 
 # Create the Dash application, make sure to adjust requests_pathname_prefx
@@ -148,7 +156,15 @@ app_dash.layout = html.Div([
             start_date=df_scalar['timestamp'].min(),
             end_date=df_scalar['timestamp'].max()
         ),    
-        # Hidden div inside the app that stores the intermediate value
+        html.Button('Refresh Data', id='refresh-data', n_clicks=0),
+        
+        # Hidden divs #
+        ###############
+        
+        # stores 
+        html.Div(id='df_scalar', style={'display': 'none'}, children=df_scalar.to_json(None)),
+        
+        # stores intermediate value
         html.Div(id='df_processed', style={'display': 'none'})
     ]),
     dcc.Graph(id='graph'),
