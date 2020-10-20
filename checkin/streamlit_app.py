@@ -33,11 +33,14 @@ def apply_date_filter(df,
     return df
 
 @st.cache
-def process_data(df):
+def process_data(df, dtagg='week'):
     aggs = ['min', 'max', 'sum', 'count']
-    dt_agg= df['timestamp'].dt.week
+    if dtagg=='week':
+        dt_agg= df['timestamp'].dt.week
+    elif dtagg=='day':
+        dt_agg= df['timestamp'].dt.day
     grpd = df.groupby([dt_agg, 'parent', 'event_type'])
-    outv = grpd['value'].agg(aggs).reset_index().rename(columns={'timestamp':'week'})
+    outv = grpd['value'].agg(aggs).reset_index().rename(columns={'timestamp':dtagg})
     return outv
     
 @st.cache
@@ -45,7 +48,7 @@ def filter_parent(df, parent='Chores'):
     return df[df['parent'] == parent]
     
 def update_figure(df,
-                  agg=['min', 'max', 'sum', 'count'][0], 
+                  agg=['sum', 'max', 'min', 'count'][0], 
                   ctype='Stacked', 
                   flipxy=False, 
                   parent='Chores'
@@ -65,6 +68,13 @@ def update_figure(df,
     fig = go.Figure(data=traces, layout=layout)
     fig.update_layout(barmode=ctype)        
     return fig
+    
+def calendar_plot(df,
+                  agg=['sum', 'min', 'max', 'count'][0], 
+                  parent='Chores'
+                  ):
+    process_data(df, dtagg='day')
+    pass
 
 if __name__ == '__main__':
     
@@ -76,7 +86,7 @@ if __name__ == '__main__':
     df_data, df_scalar, df_text = get_data(db)
     #df_data, df_scalar, df_text = get_data()
     df = apply_date_filter(df_scalar)
-    df = process_data(df)
+    
     
     ######################
     # Controls #
@@ -93,6 +103,7 @@ if __name__ == '__main__':
     if st.sidebar.checkbox('Grouped/Stacked'):
         ctype='stack'
     
+    df = process_data(df)
     fig = update_figure(df, flipxy=flipxy, ctype=ctype)  
     
     ######################
