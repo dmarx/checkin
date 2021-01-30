@@ -12,8 +12,10 @@ Another good prospect (which looks like it's using basically the same strategy w
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-from sqldatabase import SessionLocal
-from sqldbapi import get_checkins_df
+#from sqldatabase import SessionLocal
+#from sqldbapi import get_checkins_df
+from checkin.sqldatabase import SessionLocal
+from checkin.sqldbapi import get_checkins_df
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output

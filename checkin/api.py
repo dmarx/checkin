@@ -29,7 +29,8 @@ app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 
 from fastapi.middleware.wsgi import WSGIMiddleware
-from dash_app import app_dash
+#from dash_app import app_dash
+from checkin.dash_app import app_dash
 
 app.mount("/dash", WSGIMiddleware(app_dash.server))
 
