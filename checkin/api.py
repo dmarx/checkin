@@ -21,7 +21,8 @@ from checkin.sqldbapi import create_checkin, create_eventtype, \
                      update_event_type, get_etinterfaces, \
                      create_etinterface, update_event_type_interface, \
                      get_checkins_df, \
-                     get_most_recent_checkins_propagated_to_ancestors
+                     get_most_recent_checkins_propagated_to_ancestors, \
+                     get_most_recent_interaction
 
 
 Base.metadata.create_all(bind=engine)
@@ -174,12 +175,15 @@ async def listview(request: Request, db: Session = Depends(get_db)):
     
     depths = nx.shortest_path_length(G, root.id)
     nx.set_node_attributes(G, depths, 'depth')
+    most_recent_interaction = get_most_recent_interaction(db)
     
     return templates.TemplateResponse("event_types_tree.html", {"request": request,
     #return templates.TemplateResponse("sunburst-modal.html", {"request": request,
                                       "data_tree": [nx.json_graph.tree_data(G, root=root.id)],
                                       "plot_data": reshape_tree([nx.json_graph.tree_data(G, root=root.id)]),
-                                      "et_interfaces": interface_dict
+                                      "et_interfaces": interface_dict,
+                                      #"most_recent_interaction": most_recent_interaction
+                                      "most_recent_interaction": jsonable_encoder(most_recent_interaction)
                                       }) 
                                       # can I call get_event_types here?
 

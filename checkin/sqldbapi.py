@@ -73,6 +73,10 @@ def get_most_recent_checkins_propagated_to_ancestors(db: Session):
             parent = parent.parent
     return most_recent
     
+def get_most_recent_interaction(db: Session):
+    result = db.query(func.max(models.SqaCheckin.created_datetime))
+    return list(result)[0]
+    
 def get_etinterfaces(db: Session):
     results = db.query(models.SqaEtInterface)
     #return [schemas.EtInterface.from_orm(r) for r in results]
