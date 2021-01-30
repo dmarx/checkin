@@ -11,18 +11,17 @@ from fastapi.responses import JSONResponse, HTMLResponse
 from sqlalchemy.orm import Session
 from typing import Optional, List
 
-from graph_utils import build_tree, reshape_tree, fetch_event_types_graph
-from models import Checkin, EventType, EtInterface
-from sqldatabase import engine, SessionLocal
-from sqlmodels import SqaCheckin, SqaEventType, SqaEtInterface, Base
-from sqldbapi import create_checkin, create_eventtype, \
+from checkin.graph_utils import build_tree, reshape_tree, fetch_event_types_graph
+from checkin.models import Checkin, EventType, EtInterface
+from checkin.sqldatabase import engine, SessionLocal
+from checkin.sqlmodels import SqaCheckin, SqaEventType, SqaEtInterface, Base
+from checkin.sqldbapi import create_checkin, create_eventtype, \
                      get_root_event_type, get_all_event_types, \
                      get_all_checkins, get_most_recent_checkins, \
                      update_event_type, get_etinterfaces, \
                      create_etinterface, update_event_type_interface, \
                      get_checkins_df, \
                      get_most_recent_checkins_propagated_to_ancestors
-
 
 
 Base.metadata.create_all(bind=engine)
