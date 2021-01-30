@@ -123,6 +123,10 @@
 		</div>
 {%- endmacro %}
 
+Most recent interaction: {{ most_recent_interaction }}
+
+Time since last checkin: <p id="time-since-last-interaction">
+
 <div class="just-padding">
   <div class="list-group list-group-root ">
 	{%- for item in data_tree recursive %}
@@ -338,6 +342,21 @@ $(async () => {
 		*/
 	}
 	
+});
+
+// Mostly redundant with block above, just filling out time since last checkin here.
+$(async () => {
+	let dt_now = new Date();
+	let dt_last = '{{ most_recent_interaction[0] }}' + 'z';
+	console.log(dt_last);
+	console.log(Date.parse(dt_last));
+	let delta_s = (dt_now - Date.parse(dt_last)) / 1000;
+	let delta_str = time_elapsed_string(delta_s);
+	let sla = 86400;
+	
+	let badgeKind = delta_s > sla ? 'badge-light' : 'badge-success';
+
+	$(`#time-since-last-interaction`).append(`<span class="badge ${badgeKind}">${delta_str}</span>`)
 });
 
 </script>
