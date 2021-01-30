@@ -2,8 +2,10 @@ import pandas as pd
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 
-import models as schemas
-import sqlmodels as models
+#import models as schemas
+#import sqlmodels as models
+import checkin.models as schemas
+import checkin.sqlmodels as models
 
 def _attach_et_interface_mapped_attrs(et_interface: schemas.EtInterface):
     vimap = {'range':'radios', 'number':'number', 'boolean':'checkbox', 'text':'text'}

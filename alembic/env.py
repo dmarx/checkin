@@ -5,6 +5,8 @@ from sqlalchemy import pool
 
 from alembic import context
 
+from loguru import logger
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
@@ -17,7 +19,27 @@ fileConfig(config.config_file_name)
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = None
+#target_metadata = None
+
+#import os
+#import sys
+#from pathlib import Path
+#BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+#sys.path.append(BASE_DIR)
+#sys.path.append(BASE_DIR/Path('checkin')) # checkin/checkin ... so we can find sqldatabase once we're inside sqlmodels
+
+#logger.info(BASE_DIR)
+
+
+
+#import checkin
+#logger.debug(dir(checkin))
+#logger.debug(checkin.__path__)
+#logger.debug(checkin.__package__)
+from checkin import sqldatabase # this doesn't make the library available to sqlmodels...
+from checkin import sqlmodels
+
+target_metadata = sqlmodels.Base.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

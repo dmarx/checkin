@@ -2,8 +2,8 @@ from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy_utils import UUIDType
 
-from sqldatabase import Base
-
+#from sqldatabase import Base
+from checkin.sqldatabase import Base
    
 class SqaCheckin(Base):
     __tablename__ = "checkins"
@@ -13,6 +13,9 @@ class SqaCheckin(Base):
     event_type = Column(UUIDType(binary=False), ForeignKey("eventtypes.id"))
     value = Column(Integer)
     comments = Column(String)
+    
+    created_datetime = Column(DateTime)
+    updated_datetime = Column(DateTime)
     
     # should change `event_type` above to `event_type_id`
     eventtype = relationship("SqaEventType", back_populates="checkins")
