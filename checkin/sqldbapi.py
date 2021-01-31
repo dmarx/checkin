@@ -2,8 +2,10 @@ import pandas as pd
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 
-import models as schemas
-import sqlmodels as models
+#import models as schemas
+#import sqlmodels as models
+import checkin.models as schemas
+import checkin.sqlmodels as models
 
 def _attach_et_interface_mapped_attrs(et_interface: schemas.EtInterface):
     vimap = {'range':'radios', 'number':'number', 'boolean':'checkbox', 'text':'text'}
@@ -70,6 +72,10 @@ def get_most_recent_checkins_propagated_to_ancestors(db: Session):
                 most_recent[pid] = c_obj
             parent = parent.parent
     return most_recent
+    
+def get_most_recent_interaction(db: Session):
+    result = db.query(func.max(models.SqaCheckin.created_datetime))
+    return list(result)[0]
     
 def get_etinterfaces(db: Session):
     results = db.query(models.SqaEtInterface)

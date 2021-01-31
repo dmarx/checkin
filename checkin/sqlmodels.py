@@ -1,9 +1,10 @@
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy_utils import UUIDType
+from sqlalchemy.sql import func
 
-from sqldatabase import Base
-
+#from sqldatabase import Base
+from checkin.sqldatabase import Base
    
 class SqaCheckin(Base):
     __tablename__ = "checkins"
@@ -13,6 +14,11 @@ class SqaCheckin(Base):
     event_type = Column(UUIDType(binary=False), ForeignKey("eventtypes.id"))
     value = Column(Integer)
     comments = Column(String)
+    
+    # https://stackoverflow.com/a/33532154/819544
+    #created_datetime = Column(DateTime(timezone=True), server_default=func.now())
+    created_datetime = Column(DateTime(timezone=True), default=func.now())
+    updated_datetime = Column(DateTime(timezone=True), onupdate=func.now())
     
     # should change `event_type` above to `event_type_id`
     eventtype = relationship("SqaEventType", back_populates="checkins")

@@ -1,7 +1,7 @@
 import networkx as nx
 from sqlalchemy.orm import Session
-from sqldbapi import get_all_event_types, get_root_event_type
-from sqlmodels import SqaEventType
+from checkin.sqldbapi import get_all_event_types, get_root_event_type
+from checkin.sqlmodels import SqaEventType
 
 def build_tree(nodes):
     G = nx.DiGraph()

@@ -3,6 +3,7 @@ channels:
   - defaults
 dependencies:
   - aiofiles
+  - alembic
   - ipython
   - jinja2
   - networkx
