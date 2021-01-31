@@ -15,6 +15,7 @@ dependencies:
   - pip:
     - dash
     - fastapi
+    - loguru
     - pydantic
     - uvicorn
     - streamlit
