@@ -167,17 +167,7 @@ async def listview(request: Request, db: Session = Depends(get_db)):
                                       "plot_data": reshape_tree([nx.json_graph.tree_data(G, root=root.id)]),
                                       "et_interfaces": interface_dict,
                                       "most_recent_interaction": jsonable_encoder(most_recent_interaction)
-                                      }) 
-
-@app.get("/checkin/{name}/{event_type_id}")
-async def checkin(request: Request, event_type_id:uuid.UUID, db: Session = Depends(get_db) ):
-    # In the URL pattern, {name} can be literally anything. Just using this
-    # pattern for user readability. Not necessary at all. Just need the event_type_id
-    G = fetch_event_types_graph(db)
-    tree = [nx.json_graph.tree_data(G, root=event_type_id)]
-    event_type = tree[0]['obj']
-    return templates.TemplateResponse("checkin.html", {"request": request, 
-                                      "tree": tree, "event_type": event_type})
+                                      })
                                       
 #@app.get("/table/", response_class=HTMLResponse)
 @app.get("/table/")
