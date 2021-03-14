@@ -2,6 +2,8 @@
 *.db
 *.idea
 
+old_data/*
+
 ############
 
 # via https://github.com/github/gitignore/blob/master/Python.gitignore
