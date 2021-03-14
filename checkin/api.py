@@ -16,7 +16,7 @@ from checkin.models import Checkin, EventType, EtInterface
 from checkin.sqldatabase import engine, SessionLocal
 from checkin.sqlmodels import SqaCheckin, SqaEventType, SqaEtInterface, Base
 from checkin.sqldbapi import create_checkin, create_eventtype, \
-                     get_root_event_type, get_all_event_types, \
+                     get_root_event_type, \
                      get_all_checkins, get_most_recent_checkins, \
                      update_event_type, get_etinterfaces, \
                      create_etinterface, update_event_type_interface, \
