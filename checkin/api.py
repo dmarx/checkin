@@ -1,15 +1,16 @@
 from datetime import datetime
 import uuid
+
+from loguru import logger
 import networkx as nx
+from sqlalchemy.orm import Session
+from typing import Optional, List
 
 from fastapi import FastAPI, Response, Request, Depends, status  # , Form
 from fastapi.templating import Jinja2Templates
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, HTMLResponse
-
-from sqlalchemy.orm import Session
-from typing import Optional, List
 
 from checkin.graph_utils import reshape_tree, fetch_event_types_graph
 from checkin.models import Checkin, EventType, EtInterface
@@ -49,8 +50,8 @@ def get_db():
 @app.post("/checkinmany/")
 async def checkin_many(request: Request, checkins: List[Checkin], db: Session = Depends(get_db)):
     for c in checkins:
-        print("Checking in")
-        print(c)
+        logger.debug("Checking in")
+        logger.debug(c)
         create_checkin(db, c)
     return True
 
@@ -66,8 +67,8 @@ def register_event_type(event_type: EventType, db: Session):
 @app.post("/eventtype/")
 async def register_event_types(event_types: List[EventType], 
                               db: Session = Depends(get_db)):
-    print("Registering multiple")
-    print(event_types)
+    logger.debug("Registering multiple")
+    logger.debug(event_types)
     return [register_event_type(e, db) for e in event_types] # this feels like cheating...
     
 @app.put("/eventtype/interface/")
@@ -96,7 +97,7 @@ async def get_plot_data(db: Session = Depends(get_db)):
 ### This gets used by sunburst-modal.html
 @app.post("/checkin/")
 async def post_checkin(checkin: Checkin, db: Session = Depends(get_db)):
-    print("checkin pre:", checkin)
+    logger.debug("checkin pre:", checkin)
     if not checkin.timestamp:
         checkin.timestamp = datetime.now()
     create_checkin(db, checkin)
@@ -112,10 +113,11 @@ async def get_data(db: Session = Depends(get_db)):
 
 # Exceptions
 
+#@logger.catch
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    print(exc.errors())
-    print(exc.body)
+    logger.debug(exc.errors())
+    logger.debug(exc.body)
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         content=jsonable_encoder({"detail": exc.errors(), "body": exc.body}),
