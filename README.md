@@ -18,7 +18,7 @@
 	# kick off application
 
 	cd checkin # we're now in ~/checkin/checkin
-	nohup uvicorn api:app --host 0.0.0.0 8081 &
+	nohup uvicorn api:app --host 0.0.0.0 --port 8081 &
 	
 	# Stop application for restart
 	ps -aux | grep uvicorn
@@ -32,6 +32,6 @@
 	git pull origin
 	alembic upgrade head
 	cd checkin
-	nohup uvicorn api:app --host 0.0.0.0 8081 &
+	nohup uvicorn api:app --host 0.0.0.0 --port 8081 &
 	
 	
