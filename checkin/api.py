@@ -11,7 +11,7 @@ from fastapi.responses import JSONResponse, HTMLResponse
 from sqlalchemy.orm import Session
 from typing import Optional, List
 
-from checkin.graph_utils import build_tree, reshape_tree, fetch_event_types_graph
+from checkin.graph_utils import reshape_tree, fetch_event_types_graph
 from checkin.models import Checkin, EventType, EtInterface
 from checkin.sqldatabase import engine, SessionLocal
 from checkin.sqlmodels import SqaCheckin, SqaEventType, SqaEtInterface, Base
