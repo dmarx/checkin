@@ -1,9 +1,9 @@
+from loguru import logger
 import pandas as pd
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 
-#import models as schemas
-#import sqlmodels as models
+# codesmell
 import checkin.models as schemas
 import checkin.sqlmodels as models
 
@@ -98,10 +98,10 @@ def _merge_sqa(db: Session, schema_model, sqa_model, key='id'):
                  getattr(schema_model, key))\
                .first()
     if db_obj is None:
-        print("[merge_sqa] db_obj does not exist. Creating...")
+        logger.debug("[merge_sqa] db_obj does not exist. Creating...")
         return _create_sqa(db=db, schema_model=schema_model, sqa_model=sqa_model)
 
-    print('[merge_sqa] db_obj:', db_obj)
+    logger.debug('[merge_sqa] db_obj:', db_obj)
     for k, v in schema_model.dict().items():
         setattr(db_obj, k, v)
     db.commit()
