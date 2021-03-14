@@ -46,14 +46,6 @@ def get_db():
     
 # API
 
-@app.post("/checkin/")
-async def post_checkin(checkin: Checkin, db: Session = Depends(get_db)):
-    print("checkin pre:", checkin)
-    if not checkin.timestamp:
-        checkin.timestamp = datetime.now()
-    create_checkin(db, checkin)
-    return True
-
 @app.post("/checkinmany/")
 async def checkin_many(request: Request, checkins: List[Checkin], db: Session = Depends(get_db)):
     for c in checkins:
@@ -61,10 +53,6 @@ async def checkin_many(request: Request, checkins: List[Checkin], db: Session = 
         print(c)
         create_checkin(db, c)
     return True
-    
-@app.get("/checkin/")
-async def get_checkins(request: Request, db: Session = Depends(get_db)):
-    return get_most_recent_checkins(db)
 
 def register_event_type(event_type: EventType, db: Session):
     new_id = uuid.uuid4()
@@ -81,22 +69,11 @@ async def register_event_types(event_types: List[EventType],
     print("Registering multiple")
     print(event_types)
     return [register_event_type(e, db) for e in event_types] # this feels like cheating...
-
-@app.post("/eventtype/interface/")
-async def register_event_type_interfaces(event_type_interfaces: List[EtInterface], 
-                                         db: Session = Depends(get_db)):
-    return [create_etinterface(db, e) for e in event_type_interfaces]
     
 @app.put("/eventtype/interface/")
 async def update_event_type_interfaces(event_type_interfaces: List[EtInterface], 
                                          db: Session = Depends(get_db)):
     return [update_event_type_interface(db, e) for e in event_type_interfaces]
-
-@app.get("/eventtype/")
-async def get_event_types(db: Session = Depends(get_db)):
-    G = fetch_event_types_graph(db)
-    root = get_root_event_type(db)
-    return nx.json_graph.tree_data(G, root=root.id)
     
 @app.put("/eventtype/")
 async def put_event_type(event_type: EventType, db: Session = Depends(get_db)):
@@ -104,25 +81,32 @@ async def put_event_type(event_type: EventType, db: Session = Depends(get_db)):
     # To do: response conditional on update success. 
     # Report to user if something went wrong.
     return result
-    
-@app.get("/eventtype/{eventtype_id}", response_model=EventType)
-async def get_event_type(eventtype_id: uuid.UUID):
-    G = fetch_event_types_graph(db)
-    return G.nodes(data=True)[eventtype_id]['obj']
-    
-@app.get("/data/")
-async def get_data(db: Session = Depends(get_db)):
-    return get_all_checkins(db)
-    
+        
+@app.get("/mostrecent/")
+async def get_most_recent(db: Session = Depends(get_db)):
+    return get_most_recent_checkins_propagated_to_ancestors(db)
+
+### This gets used by sunburst-modal.html
 @app.get("/plot_data/")
 async def get_plot_data(db: Session = Depends(get_db)):
     G = fetch_event_types_graph(db)
     root = get_root_event_type(db)
     return reshape_tree([nx.json_graph.tree_data(G, root=root.id)])[0]
     
-@app.get("/mostrecent/")
-async def get_most_recent(db: Session = Depends(get_db)):
-    return get_most_recent_checkins_propagated_to_ancestors(db)
+### This gets used by sunburst-modal.html
+@app.post("/checkin/")
+async def post_checkin(checkin: Checkin, db: Session = Depends(get_db)):
+    print("checkin pre:", checkin)
+    if not checkin.timestamp:
+        checkin.timestamp = datetime.now()
+    create_checkin(db, checkin)
+    return True
+
+# Doesn't look like this gets used anywhere, but I feel like it's a nice endpoint to have for debugging.
+@app.get("/data/")
+async def get_data(db: Session = Depends(get_db)):
+    return get_all_checkins(db)
+
 
 ############################################
 
@@ -140,7 +124,6 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 ############################################
 
 # pages
-    
 
 # holding on to this for now... maybe reuse this visual for emotions checkin?        
 @app.get("/sunburst")
