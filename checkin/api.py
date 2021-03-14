@@ -7,7 +7,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, HTMLResponse
-#from fastapi.staticfiles import StaticFiles
+
 from sqlalchemy.orm import Session
 from typing import Optional, List
 
@@ -30,7 +30,6 @@ app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 
 from fastapi.middleware.wsgi import WSGIMiddleware
-#from dash_app import app_dash
 from checkin.dash_app import app_dash
 
 app.mount("/dash", WSGIMiddleware(app_dash.server))
@@ -83,14 +82,9 @@ async def register_event_types(event_types: List[EventType],
     print(event_types)
     return [register_event_type(e, db) for e in event_types] # this feels like cheating...
 
-#def register_event_type_interface(et_interface: EtInterface, db: Session):
-#    create_etinterface(db, et_interface)
-#    return True
-
 @app.post("/eventtype/interface/")
 async def register_event_type_interfaces(event_type_interfaces: List[EtInterface], 
                                          db: Session = Depends(get_db)):
-    #return [register_event_type_interface(e, db) for e in
     return [create_etinterface(db, e) for e in event_type_interfaces]
     
 @app.put("/eventtype/interface/")
@@ -147,27 +141,18 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 # pages
     
-@app.get("/")
-async def homepage(request: Request):
-    return templates.TemplateResponse("register_event_type.html", {"request": request})
-    
-@app.get("/test")
-async def test(request: Request):
-    return templates.TemplateResponse("register_event_type3.html", {"request": request, 
-                                      "vars_dict":{"name":"str", "parent_id":"str"}})
-        
-@app.get("/tree")
+
+# holding on to this for now... maybe reuse this visual for emotions checkin?        
+@app.get("/sunburst")
 async def tree(request: Request, db: Session = Depends(get_db)):
-    #return templates.TemplateResponse("event_types_tree.html", {"request": request,
     G = fetch_event_types_graph(db)
     root = get_root_event_type(db)
     return templates.TemplateResponse("sunburst-modal.html", {"request": request,
                                       "data_tree": [nx.json_graph.tree_data(G, root=root.id)],
                                       "plot_data": reshape_tree([nx.json_graph.tree_data(G, root=root.id)])
                                       }) 
-                                      # can I call get_event_types here?
 
-@app.get("/list")
+@app.get("/")
 async def listview(request: Request, db: Session = Depends(get_db)):
     G = fetch_event_types_graph(db)
     root = get_root_event_type(db)
@@ -178,14 +163,11 @@ async def listview(request: Request, db: Session = Depends(get_db)):
     most_recent_interaction = get_most_recent_interaction(db)
     
     return templates.TemplateResponse("event_types_tree.html", {"request": request,
-    #return templates.TemplateResponse("sunburst-modal.html", {"request": request,
                                       "data_tree": [nx.json_graph.tree_data(G, root=root.id)],
                                       "plot_data": reshape_tree([nx.json_graph.tree_data(G, root=root.id)]),
                                       "et_interfaces": interface_dict,
-                                      #"most_recent_interaction": most_recent_interaction
                                       "most_recent_interaction": jsonable_encoder(most_recent_interaction)
                                       }) 
-                                      # can I call get_event_types here?
 
 @app.get("/checkin/{name}/{event_type_id}")
 async def checkin(request: Request, event_type_id:uuid.UUID, db: Session = Depends(get_db) ):
