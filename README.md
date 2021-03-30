@@ -25,6 +25,7 @@
 	pgrep uvicorn | xargs kill
 	
 	# Incorporate changes and restart
+	# source ~/checkin/env/env_ci/bin/activate
 	scp .. # backup database locally
 	ssh .. # remote into host
 	pgrep uvicorn | xargs kill
