@@ -23,7 +23,8 @@ from checkin.sqldbapi import create_checkin, create_eventtype, \
                      create_etinterface, update_event_type_interface, \
                      get_checkins_df, \
                      get_most_recent_checkins_propagated_to_ancestors, \
-                     get_most_recent_interaction
+                     get_most_recent_interaction, \
+                     get_all_event_types
 
 
 Base.metadata.create_all(bind=engine)
@@ -108,6 +109,30 @@ async def post_checkin(checkin: Checkin, db: Session = Depends(get_db)):
 async def get_data(db: Session = Depends(get_db)):
     return get_all_checkins(db)
 
+############################################
+
+@app.get("/nfc-api/")
+async def nfc_submit(et_id: str, 
+                     db: Session = Depends(get_db)):
+    # et_id just needs to match first few characters
+    logger.debug(f"[et_id] {et_id}")
+    et = None
+    for candidate in get_all_event_types(db):
+        #logger.debug(f"[candidate] {candidate}")
+        idstr = str(candidate.id)
+        if idstr.startswith(et_id):
+            et = candidate
+            break
+    if not et:
+        return None
+    checkin = Checkin(
+        timestamp = datetime.now(),
+        event_type = et.id,
+        value = True
+    )
+    logger.debug(f"[checkin] {checkin}")
+    create_checkin(db, checkin)
+    return checkin
 
 ############################################
 
