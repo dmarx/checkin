@@ -25,6 +25,8 @@ from checkin.sqldbapi import create_checkin, create_eventtype, \
                      get_most_recent_checkins_propagated_to_ancestors, \
                      get_most_recent_interaction, \
                      get_all_event_types
+                     
+from checkin.random_cute_image import random_cute_image_url
 
 
 Base.metadata.create_all(bind=engine)
@@ -113,7 +115,9 @@ async def get_data(db: Session = Depends(get_db)):
 
 @app.get("/nfc-api/")
 async def nfc_submit(et_id: str, 
-                     db: Session = Depends(get_db)):
+                     request: Request,
+                     db: Session = Depends(get_db)
+                     ):
     # et_id just needs to match first few characters
     logger.debug(f"[et_id] {et_id}")
     et = None
@@ -132,7 +136,8 @@ async def nfc_submit(et_id: str,
     )
     logger.debug(f"[checkin] {checkin}")
     create_checkin(db, checkin)
-    return checkin
+    #return checkin
+    return templates.TemplateResponse("nfc_success.html", {"request": request, 'image_url': random_cute_image_url()})
 
 ############################################
 
