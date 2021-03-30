@@ -45,6 +45,7 @@ extensions_blacklist = [
 ]
 
 def random_cute_image_url():
+    max_items = 100
     base_days = 30
     k = random.randint(0,7)
     i = random.randint(0,4)
@@ -65,7 +66,12 @@ def random_cute_image_url():
         cond3 = not any(p.url.endswith(suffix) for suffix in extensions_blacklist)
         
         if all([cond1, cond2, cond3]):
+            logger.debug(p)
             url = p.url
             if ('imgur' in p.domain) and (not cond2a):
                 url += '.png'
+            logger.info(url)
             return url
+            
+        if j > max_items:
+            return None
