@@ -1,5 +1,6 @@
 from datetime import datetime
 import uuid
+import time # for debugging
 
 from loguru import logger
 import networkx as nx
@@ -113,6 +114,38 @@ async def get_data(db: Session = Depends(get_db)):
 
 ############################################
 
+#@app.get("/cute")
+#def cute(request: Request):
+#    st = time.time()
+#    url = random_cute_image_url()
+#    et = time.time()
+#    logger.debug(f"elapsed: {et-st}")
+#    logger.debug(url)
+#    return templates.TemplateResponse("nfc_success.html", {
+#                                            "request": request, 
+#                                            'image_url': url})
+                               
+#@app.get("/cute/{sub}")
+@app.get("/cute")
+async def cute4sub(request: Request
+                  #,sub: str = None
+                  ):
+    sub = 'dogswearinghats'
+    logger.debug(sub)
+    logger.debug(type(sub))
+    # WEIRD...
+    if sub == 'None':
+        sub = None
+        logger.debug(type(sub))
+    st = time.time()
+    url = await random_cute_image_url(sub)
+    et = time.time()
+    logger.debug(f"elapsed: {et-st}")
+    logger.debug(url)
+    return templates.TemplateResponse("nfc_success.html", {
+                                            "request": request, 
+                                            'image_url': url})
+
 @app.get("/nfc-api/")
 async def nfc_submit(et_id: str, 
                      request: Request,
@@ -137,7 +170,8 @@ async def nfc_submit(et_id: str,
     logger.debug(f"[checkin] {checkin}")
     create_checkin(db, checkin)
     #return checkin
-    return templates.TemplateResponse("nfc_success.html", {"request": request, 'image_url': random_cute_image_url()})
+    url = await random_cute_image_url()
+    return templates.TemplateResponse("nfc_success.html", {"request": request, 'image_url': url})
 
 ############################################
 
