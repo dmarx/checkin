@@ -27,8 +27,8 @@ from checkin.sqldbapi import create_checkin, create_eventtype, \
                      get_most_recent_interaction, \
                      get_all_event_types
                      
-from checkin.random_cute_image import random_cute_image_url
-
+from checkin.gamification.random_cute_image import random_cute_image_url
+from checkin.gamification.random_affirmation import random_affirmation_text
 
 Base.metadata.create_all(bind=engine)
 app = FastAPI()
@@ -124,7 +124,11 @@ async def get_data(db: Session = Depends(get_db)):
 #    return templates.TemplateResponse("nfc_success.html", {
 #                                            "request": request, 
 #                                            'image_url': url})
-                               
+                         
+
+# User.query.get(23)
+# SqaEventType.query.get(et_id)
+                         
 #@app.get("/cute/{sub}")
 @app.get("/cute")
 async def cute4sub(request: Request
@@ -167,11 +171,19 @@ async def nfc_submit(et_id: str,
         event_type = et.id,
         value = True
     )
+    logger.debug(f"[eventtype] {et}")
     logger.debug(f"[checkin] {checkin}")
     create_checkin(db, checkin)
     #return checkin
     url = await random_cute_image_url()
-    return templates.TemplateResponse("nfc_success.html", {"request": request, 'image_url': url})
+    affirmation = random_affirmation_text()
+    return templates.TemplateResponse(
+        "nfc_success.html", {
+            "request": request, 
+            'et': et,
+            'image_url': url,
+            'affirmation':affirmation
+         })
 
 ############################################
 
